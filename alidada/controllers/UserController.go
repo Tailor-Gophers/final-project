@@ -11,6 +11,10 @@ type UserController struct {
 	UserService services.UserService
 }
 
+func NewUserController() UserController {
+	return UserController{UserService: services.NewUserService()}
+}
+
 type signUpForm struct {
 	Email       string `json:"email"`
 	UserName    string `json:"user_name"`
@@ -51,7 +55,6 @@ func (u *UserController) Signup(c echo.Context) error {
 		FirstName:   signupReq.FirstName,
 		LastName:    signupReq.LastName,
 		PhoneNumber: signupReq.PhoneNumber,
-		Admin:       false,
 	}
 
 	err = u.UserService.CreateUser(&newUser)

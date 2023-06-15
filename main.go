@@ -1,7 +1,7 @@
 package main
 
 import (
-	"final-project/alidada/app"
+	"final-project/app"
 	"log"
 )
 

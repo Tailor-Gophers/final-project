@@ -13,7 +13,8 @@ func GenerateTokenPair(user *models.User) (map[string]string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["sub"] = 1
 	claims["name"] = user.UserName
-	claims["admin"] = user.Admin
+	//todo
+	//claims["admin"] = user.Admin
 	claims["exp"] = time.Now().Add(time.Minute * 15).Unix()
 
 	t, err := token.SignedString([]byte("secret"))
