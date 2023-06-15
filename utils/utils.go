@@ -3,6 +3,9 @@ package utils
 import (
 	"errors"
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,4 +28,16 @@ func HashPassword(pass string) (string, error) {
 // ValidatePassword compares given password with hashed password
 func ValidatePassword(givenPass, pass string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(givenPass), []byte(pass)) == nil
+}
+
+func ENV(key string) string {
+
+	// load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return os.Getenv(key)
 }
