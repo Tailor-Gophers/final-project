@@ -1,14 +1,14 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type AccessToken struct {
 	gorm.Model
-	Id        uint   `gorm:"primaryKey;autoIncrement"`
-	UserId    uint   `gorm:"index"`
+	UserId    uint
 	Token     string `gorm:"uniqueIndex"`
 	ExpiresAt time.Time
 }
