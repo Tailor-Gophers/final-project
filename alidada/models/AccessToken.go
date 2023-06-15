@@ -9,6 +9,6 @@ import (
 type AccessToken struct {
 	gorm.Model
 	UserId    uint
-	Token     string `gorm:"uniqueIndex"`
+	Token     string `gorm:"unique;size:255"`
 	ExpiresAt time.Time
 }
