@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -23,6 +25,18 @@ func HashPassword(pass string) (string, error) {
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	return string(hash), err
+}
+
+func HashToken(pass string) (string, error) {
+	if len(pass) == 0 {
+		return "", errors.New("password cannot be empty")
+	}
+
+	h := sha256.New()
+	h.Write([]byte(pass))
+	// Calculate and print the hash
+	s := fmt.Sprintf("%x", h.Sum(nil))
+	return s, nil
 }
 
 // ValidatePassword compares given password with hashed password

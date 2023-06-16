@@ -2,6 +2,7 @@ package app
 
 import (
 	"final-project/alidada/controllers"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,6 +28,9 @@ func alidadaRouting(e *echo.Echo) {
 	userController := controllers.NewUserController()
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/signup", userController.Signup)
+	authGroup.POST("/login", userController.Login)
+	// authGroup.POST("/logout", userController.Login)
+
 }
 
 func qsmsRouting(e *echo.Echo) {

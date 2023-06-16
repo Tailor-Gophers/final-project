@@ -3,8 +3,11 @@ package controllers
 import (
 	"final-project/alidada/models"
 	"final-project/alidada/services"
-	"github.com/labstack/echo/v4"
+	"final-project/utils"
+	"fmt"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {
@@ -44,7 +47,7 @@ func (u *UserController) Signup(c echo.Context) error {
 	}
 
 	//Check password
-	if validatePassword(signupReq.Password) {
+	if !validatePassword(signupReq.Password) {
 		return c.String(http.StatusBadRequest, "Password: "+signupReq.Password+" is too short.")
 	}
 
@@ -61,7 +64,7 @@ func (u *UserController) Signup(c echo.Context) error {
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
-	return c.JSON(http.StatusCreated, nil)
+	return c.String(http.StatusCreated, "Registration was successful")
 }
 
 func validatePassword(password string) bool {
@@ -70,4 +73,40 @@ func validatePassword(password string) bool {
 	//todo more constraints
 
 	return lengthConstraint
+}
+
+type loginReq struct {
+	// Email or User name required
+	Email    string `json:"email"`     //opitional
+	UserName string `json:"user_name"` //opitional
+	Password string `json:"password"`
+}
+
+func (u *UserController) Login(c echo.Context) error {
+	loginReq := &loginReq{}
+	c.Bind(&loginReq)
+	var user *models.User
+	var err error
+	if loginReq.UserName == "" {
+		user, err = u.UserService.GetUserByEmail(loginReq.Email)
+		fmt.Println(user)
+	} else {
+		user, err = u.UserService.GetUserByUserName(loginReq.UserName)
+	}
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	if utils.ValidatePassword(user.Password, loginReq.Password) {
+		token, err := utils.GenerateTokenPair(user)
+		if err != nil {
+			return echo.ErrInternalServerError
+		}
+		err = u.UserService.SaveToken(user, token)
+		if err != nil {
+			return echo.ErrInternalServerError
+		}
+		return c.JSON(http.StatusOK, map[string]string{"token": token})
+	}
+
+	return echo.ErrUnauthorized
 }

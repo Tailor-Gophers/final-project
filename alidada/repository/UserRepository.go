@@ -3,8 +3,11 @@ package repository
 import (
 	"errors"
 	"final-project/alidada/models"
+	"final-project/utils"
 	"fmt"
+	"time"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +17,7 @@ type UserRepository interface {
 	GetUserByEmail(username string) (*models.User, error)
 	GetUserByUserId(userId uint) (*models.User, error)
 	DeleteUser(userId uint) error
+	SaveToken(user *models.User, token string) error
 }
 
 type userGormRepository struct {
@@ -62,4 +66,34 @@ func (ur *userGormRepository) GetUserByUserId(userId uint) (*models.User, error)
 		return nil, result.Error
 	}
 	return &user, nil
+}
+
+func (ur *userGormRepository) SaveToken(user *models.User, token string) error {
+
+	hashed, err := utils.HashToken(token)
+	if err != nil {
+		fmt.Print(err)
+		return err
+	}
+	AccessToken := models.AccessToken{UserId: user.ID, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
+
+	result := ur.db.Create(&AccessToken)
+
+	return result.Error
+}
+
+func getDbConnection() *gorm.DB {
+
+	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
+	// Connect to the database
+
+	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	err = db.AutoMigrate(&models.AccessToken{}, &models.User{})
+	if err != nil {
+		panic(err)
+	}
+	return db
 }
