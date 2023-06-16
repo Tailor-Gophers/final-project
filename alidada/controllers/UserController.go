@@ -6,6 +6,7 @@ import (
 	"final-project/utils"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -109,4 +110,33 @@ func (u *UserController) Login(c echo.Context) error {
 	}
 
 	return echo.ErrUnauthorized
+}
+
+func (u *UserController) GetUserByToken(c echo.Context) error {
+
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return echo.ErrUnauthorized
+	} else {
+		return c.JSON(http.StatusOK, user)
+
+	}
+
+}
+
+func GetToken(c echo.Context) string {
+
+	authorization := c.Request().Header["Authorization"]
+	Bearer := authorization[0]
+	token := strings.Split(Bearer, "Bearer ")[1]
+	return token
+}
+
+func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
+	token := GetToken(c)
+	user, err := u.UserService.UserByToken(token)
+	if err != nil {
+		return nil, echo.ErrInternalServerError
+	}
+	return user, nil
 }

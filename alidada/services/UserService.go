@@ -12,6 +12,7 @@ type UserService interface {
 	GetUserByEmail(email string) (*models.User, error)
 	DeleteUser(username string) error
 	SaveToken(user *models.User, token string) error
+	UserByToken(token string) (*models.User, error)
 }
 
 type userService struct {
@@ -52,4 +53,9 @@ func (s *userService) RefreshToken(user *models.User, token string) error {
 func (s *userService) DeleteUser(username string) error {
 	//todo if needed
 	return nil
+}
+
+func (s *userService) UserByToken(token string) (*models.User, error) {
+	return s.userRepository.UserByToken(token)
+
 }
