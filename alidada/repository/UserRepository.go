@@ -1,9 +1,9 @@
 package repository
 
 import (
+	"alidada/models"
+	"alidada/utils"
 	"errors"
-	"final-project/alidada/models"
-	"final-project/utils"
 	"fmt"
 	"time"
 

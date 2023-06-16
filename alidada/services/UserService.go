@@ -1,9 +1,9 @@
 package services
 
 import (
-	"final-project/alidada/models"
-	"final-project/alidada/repository"
-	"final-project/utils"
+	"alidada/models"
+	"alidada/repository"
+	"alidada/utils"
 )
 
 type UserService interface {

@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"final-project/alidada/models"
-	"final-project/alidada/services"
-	"final-project/utils"
+	"alidada/models"
+	"alidada/services"
+	"alidada/utils"
 	"fmt"
 	"net/http"
 	"strings"

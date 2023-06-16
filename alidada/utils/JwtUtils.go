@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"final-project/alidada/models"
+	"alidada/models"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

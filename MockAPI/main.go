@@ -1,8 +1,8 @@
 package main
 
 import (
-	"final-project/app"
 	"log"
+	"mockapi/app"
 )
 
 func main() {

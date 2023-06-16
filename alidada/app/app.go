@@ -1,7 +1,7 @@
 package app
 
 import (
-	"final-project/alidada/controllers"
+	"alidada/controllers"
 
 	"github.com/labstack/echo/v4"
 )
