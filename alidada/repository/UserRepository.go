@@ -19,6 +19,7 @@ type UserRepository interface {
 	DeleteUser(userId uint) error
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
+	LogOut(token string) error
 }
 
 type userGormRepository struct {
@@ -99,6 +100,22 @@ func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
 		return nil, err
 	}
 	return &User, nil
+}
+
+func (ur *userGormRepository) LogOut(token string) error {
+	var AccessToken models.AccessToken
+
+	hashed, err := utils.HashToken(token)
+	if err != nil {
+		return err
+	}
+	err = ur.db.Where("token = ?", hashed).Where("expires_at > ?", time.Now()).First(&AccessToken).Error
+
+	ur.db.Where("token = ?", hashed).Where("expires_at > ?", time.Now()).Delete(&AccessToken)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getDbConnection() *gorm.DB {

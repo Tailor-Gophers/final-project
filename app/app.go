@@ -30,6 +30,7 @@ func alidadaRouting(e *echo.Echo) {
 	authGroup.POST("/signup", userController.Signup)
 	authGroup.POST("/login", userController.Login)
 	authGroup.POST("/me", userController.GetUserByToken)
+	authGroup.POST("/logout", userController.LogOut)
 
 	// authGroup.POST("/logout", userController.Login)
 

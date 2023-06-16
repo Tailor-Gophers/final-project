@@ -124,6 +124,19 @@ func (u *UserController) GetUserByToken(c echo.Context) error {
 
 }
 
+func (u *UserController) LogOut(c echo.Context) error {
+
+	token := GetToken(c)
+	err := u.UserService.LogOut(token)
+	if err != nil {
+		return echo.ErrUnauthorized
+	} else {
+		return c.String(http.StatusOK, "Logout was successful")
+
+	}
+
+}
+
 func GetToken(c echo.Context) string {
 
 	authorization := c.Request().Header["Authorization"]

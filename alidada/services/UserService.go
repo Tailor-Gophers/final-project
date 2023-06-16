@@ -13,6 +13,7 @@ type UserService interface {
 	DeleteUser(username string) error
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
+	LogOut(token string) error
 }
 
 type userService struct {
@@ -57,5 +58,8 @@ func (s *userService) DeleteUser(username string) error {
 
 func (s *userService) UserByToken(token string) (*models.User, error) {
 	return s.userRepository.UserByToken(token)
+}
 
+func (s *userService) LogOut(token string) error {
+	return s.userRepository.LogOut(token)
 }
