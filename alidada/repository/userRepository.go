@@ -1,13 +1,13 @@
 package repository
 
 import (
+	"alidada/db"
 	"alidada/models"
 	"alidada/utils"
 	"errors"
 	"fmt"
 	"time"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +28,7 @@ type userGormRepository struct {
 
 func NewGormUserRepository() UserRepository {
 	return &userGormRepository{
-		db: getDbConnection(),
+		db: db.GetDbConnection(),
 	}
 }
 
@@ -76,7 +76,7 @@ func (ur *userGormRepository) SaveToken(user *models.User, token string) error {
 	if err != nil {
 		return err
 	}
-	AccessToken := models.AccessToken{UserId: user.ID, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
+	AccessToken := models.Token{UserId: user.ID, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
 
 	result := ur.db.Create(&AccessToken)
 
@@ -84,7 +84,7 @@ func (ur *userGormRepository) SaveToken(user *models.User, token string) error {
 }
 
 func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
-	var AccessToken models.AccessToken
+	var AccessToken models.Token
 	var User models.User
 
 	hashed, err := utils.HashToken(token)
@@ -103,7 +103,7 @@ func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
 }
 
 func (ur *userGormRepository) LogOut(token string) error {
-	var AccessToken models.AccessToken
+	var AccessToken models.Token
 
 	hashed, err := utils.HashToken(token)
 	if err != nil {
@@ -116,20 +116,4 @@ func (ur *userGormRepository) LogOut(token string) error {
 		return err
 	}
 	return nil
-}
-
-func getDbConnection() *gorm.DB {
-
-	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
-	// Connect to the database
-
-	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	err = db.AutoMigrate(&models.AccessToken{}, &models.User{})
-	if err != nil {
-		panic(err)
-	}
-	return db
 }

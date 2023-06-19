@@ -2,7 +2,6 @@ package app
 
 import (
 	"alidada/controllers"
-
 	"github.com/labstack/echo/v4"
 )
 

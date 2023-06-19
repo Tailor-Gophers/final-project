@@ -3,6 +3,7 @@ package flightRepository
 import (
 	"errors"
 	"fmt"
+	"mockapi/db"
 	"mockapi/models"
 	"time"
 
@@ -25,7 +26,7 @@ type flightGormRepository struct {
 
 func NewGormFlightRepository() FlightRepository {
 	return &flightGormRepository{
-		db: getDbConnection(),
+		db: db.GetDbConnection(),
 	}
 }
 

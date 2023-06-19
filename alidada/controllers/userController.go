@@ -77,9 +77,9 @@ func validatePassword(password string) bool {
 }
 
 type loginReq struct {
-	// Email or User name required
-	Email    string `json:"email"`     //opitional
-	UserName string `json:"user_name"` //opitional
+	// Email or Username required
+	Email    string `json:"email"`     //optional
+	UserName string `json:"user_name"` //optional
 	Password string `json:"password"`
 }
 

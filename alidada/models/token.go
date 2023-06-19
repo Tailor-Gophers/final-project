@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type AccessToken struct {
+type Token struct {
 	gorm.Model
 	UserId    uint
 	Token     string `gorm:"unique;size:255"`
