@@ -10,5 +10,6 @@ type User struct {
 	FirstName   string  `gorm:"size:255" db:"first_name" json:"first_name"`
 	LastName    string  `gorm:"size:255" db:"last_name" json:"last_name"`
 	PhoneNumber string  `gorm:"size:10" json:"phone_number"`
+	IsAdmin     bool    `gorm:"default:false" json:"is_admin"`
 	Tokens      []Token `json:"tokens,omitempty"`
 }

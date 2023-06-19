@@ -4,7 +4,6 @@ import (
 	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -26,6 +25,13 @@ type signUpForm struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	PhoneNumber string `json:"phone_number"`
+}
+
+type loginForm struct {
+	// Email or Username required
+	Email    string `json:"email"`     //optional
+	UserName string `json:"user_name"` //optional
+	Password string `json:"password"`
 }
 
 func (u *UserController) Signup(c echo.Context) error {
@@ -76,21 +82,17 @@ func validatePassword(password string) bool {
 	return lengthConstraint
 }
 
-type loginReq struct {
-	// Email or Username required
-	Email    string `json:"email"`     //optional
-	UserName string `json:"user_name"` //optional
-	Password string `json:"password"`
-}
-
 func (u *UserController) Login(c echo.Context) error {
-	loginReq := &loginReq{}
-	c.Bind(&loginReq)
+	loginReq := &loginForm{}
+	err := c.Bind(&loginReq)
+
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid login form.")
+	}
+
 	var user *models.User
-	var err error
 	if loginReq.UserName == "" {
 		user, err = u.UserService.GetUserByEmail(loginReq.Email)
-		fmt.Println(user)
 	} else {
 		user, err = u.UserService.GetUserByUserName(loginReq.UserName)
 	}
