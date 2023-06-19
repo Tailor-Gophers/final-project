@@ -17,7 +17,7 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate(&models.Flight{})
+	err = db.AutoMigrate(&models.Flight{}, &models.Aircraft{})
 	if err != nil {
 		panic(err)
 	}

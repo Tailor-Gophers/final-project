@@ -1,12 +1,12 @@
-package flightService
+package services
 
 import (
 	"mockapi/models"
-	"mockapi/repository/flightRepository"
+	"mockapi/repository"
 	"time"
 )
 
-func NewFlightService(flightRepo flightRepository.FlightRepository) FlightService {
+func NewFlightService(flightRepo repository.FlightRepository) FlightService {
 	return &flightService{
 		flightRepository: flightRepo,
 	}
@@ -23,7 +23,7 @@ type FlightService interface {
 }
 
 type flightService struct {
-	flightRepository flightRepository.FlightRepository
+	flightRepository repository.FlightRepository
 }
 
 func (s *flightService) GetFlight(id int64) (*models.Flight, error) {

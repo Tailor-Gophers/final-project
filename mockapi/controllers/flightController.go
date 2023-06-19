@@ -1,7 +1,7 @@
-package flightcontroller
+package controllers
 
 import (
-	"mockapi/services/flightService"
+	"mockapi/services"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,7 +10,7 @@ import (
 )
 
 type FlightController struct {
-	FlightService flightService.FlightService
+	FlightService services.FlightService
 }
 
 func (f *FlightController) GetFlightByID(c echo.Context) error {

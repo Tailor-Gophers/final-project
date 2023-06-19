@@ -1,12 +1,11 @@
 package app
 
 import (
-	"mockapi/controllers/flightcontroller"
-	"mockapi/repository/flightRepository"
-	"mockapi/services/flightService"
-
 	"github.com/labstack/echo"
 	_ "gorm.io/driver/mysql"
+	"mockapi/controllers"
+	"mockapi/repository"
+	"mockapi/services"
 )
 
 type App struct {
@@ -27,9 +26,9 @@ func (a *App) Start(addr string) error {
 }
 
 func routing(e *echo.Echo) {
-	flightRepo := flightRepository.NewGormFlightRepository()
-	FlightService := flightService.NewFlightService(flightRepo)
-	FlightController := flightcontroller.FlightController{FlightService: FlightService}
+	flightRepo := repository.NewGormFlightRepository()
+	FlightService := services.NewFlightService(flightRepo)
+	FlightController := controllers.FlightController{FlightService: FlightService}
 
 	// Public routes
 	e.GET("/flights/:id", FlightController.GetFlightByID)

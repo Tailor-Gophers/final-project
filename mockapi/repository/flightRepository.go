@@ -1,4 +1,4 @@
-package flightRepository
+package repository
 
 import (
 	"errors"
