@@ -2,6 +2,7 @@ package app
 
 import (
 	"alidada/controllers"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,6 +25,7 @@ func (a *App) Start(addr string) error {
 }
 
 func alidadaRouting(e *echo.Echo) {
+	flightController := controllers.NewFlightController()
 	userController := controllers.NewUserController()
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/signup", userController.Signup)
@@ -32,6 +34,9 @@ func alidadaRouting(e *echo.Echo) {
 	authGroup.POST("/logout", userController.LogOut)
 
 	// authGroup.POST("/logout", userController.Login)
+
+	// mockapi
+	e.GET("/flights", flightController.SearchFlights)
 
 }
 

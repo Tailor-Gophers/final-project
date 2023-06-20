@@ -1,11 +1,12 @@
 package app
 
 import (
-	"github.com/labstack/echo"
-	_ "gorm.io/driver/mysql"
 	"mockapi/controllers"
 	"mockapi/repository"
 	"mockapi/services"
+
+	"github.com/labstack/echo/v4"
+	_ "gorm.io/driver/mysql"
 )
 
 type App struct {
