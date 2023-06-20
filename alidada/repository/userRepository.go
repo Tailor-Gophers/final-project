@@ -17,6 +17,8 @@ type UserRepository interface {
 	GetUserByEmail(username string) (*models.User, error)
 	GetUserByUserId(userId uint) (*models.User, error)
 	DeleteUser(userId uint) error
+	CreatePassenger(user *models.User, passenger *models.Passenger) error
+	GetPassengers(user *models.User) ([]models.Passenger, error)
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
@@ -54,6 +56,19 @@ func (ur *userGormRepository) GetUserByEmail(email string) (*models.User, error)
 	return &user, nil
 }
 
+func (ur *userGormRepository) CreatePassenger(user *models.User, passenger *models.Passenger) error {
+	return ur.db.Save(user).Association("Passengers").Append(passenger)
+}
+
+func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passenger, error) {
+	var passengers []models.Passenger
+	err := ur.db.Model(user).Association("Passengers").Find(&passengers)
+	if err != nil {
+		return nil, err
+	}
+	return passengers, nil
+}
+
 func (ur *userGormRepository) DeleteUser(userId uint) error {
 	return ur.db.Delete(&models.User{}, userId).Error
 }
@@ -76,7 +91,7 @@ func (ur *userGormRepository) SaveToken(user *models.User, token string) error {
 	if err != nil {
 		return err
 	}
-	AccessToken := models.Token{UserId: user.ID, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
+	AccessToken := models.Token{UserId: user.Id, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
 
 	result := ur.db.Create(&AccessToken)
 

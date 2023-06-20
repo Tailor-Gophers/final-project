@@ -1,0 +1,44 @@
+POST http://localhost:3000/api/user/AddPassenger/Pluto
+Content-Type: application/json
+
+{
+  "first_name": "Navid",
+  "last_name": "Ebrahimi",
+  "gender": "Male",
+  "date_of_birth": "000-0",
+  "nationality": "Iran",
+  "passport_number": "123456"
+}
+
+###
+POST http://localhost:3000/api/user/AddPassenger/Pluto
+Content-Type: application/json
+
+{
+  "first_name": "Behzad",
+  "last_name": "Ebram",
+  "gender": "Female",
+  "date_of_birth": "000-1",
+  "nationality": "Iranian",
+  "passport_number": "1234567"
+}
+
+###
+POST http://localhost:3000/api/user/AddPassenger/Eqbalina
+Content-Type: application/json
+
+{
+  "first_name": "Nima",
+  "last_name": "Ebi",
+  "gender": "Male",
+  "date_of_birth": "000-0",
+  "nationality": "Iran",
+  "passport_number": "123456"
+}
+
+###
+GET http://localhost:3000/api/user/passengers/Pluto
+
+###
+GET http://localhost:3000/api/user/passengers/
+Authorization: Bearer {{auth_token}}

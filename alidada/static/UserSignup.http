@@ -1,0 +1,38 @@
+POST http://localhost:3000/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "user_name": "Pluto",
+  "password": "nima1234",
+  "first_name": "Nima",
+  "last_name": "Ebrahimi",
+  "passengers": [],
+  "phone_number": "09134587287"
+}
+
+###
+POST http://localhost:3000/api/auth/signup
+Content-Type: application/json
+
+{
+"email": "ugabuga@gmail.com",
+"user_name": "Uga",
+"password": "ugghbugh",
+"first_name": "Uga",
+"last_name": "Buga",
+"phone_number": "09120001234"
+}
+
+###
+POST http://localhost:3000/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "eghbalshirasb@gmail.com",
+  "user_name": "Eqbalina",
+  "password": "eqbal1234",
+  "first_name": "Eghbal",
+  "last_name": "Shirasb",
+  "phone_number": "09196985640"
+}
