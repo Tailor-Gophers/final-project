@@ -79,6 +79,9 @@ func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Redu
 	}
 	result, err := f.FlightService.ReserveFlightCapacity(int64(id))
 	if err != nil {
+		if err.Error() == "flight capacity reached" {
+			return c.String(http.StatusNotFound, "Flight capacity reached!")
+		}
 		return c.String(http.StatusNotFound, "No Flight Found!")
 	}
 	return c.JSON(http.StatusOK, result)
@@ -91,7 +94,41 @@ func (f *FlightController) ReturnFlightCapacity(c echo.Context) error { // Incre
 	}
 	result, err := f.FlightService.ReturnFlightCapacity(int64(id))
 	if err != nil {
+		if err.Error() == "flight capacity is already empty" {
+			return c.String(http.StatusNotFound, "Flight capacity is already empty!")
+		}
 		return c.String(http.StatusNotFound, "No Flight Found!")
 	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (f *FlightController) GetFlightByFilter(c echo.Context) error {
+	airline := c.Param("airline")
+	aircraft := c.Param("aircraft")
+	departureStr := c.Param("departure")
+
+	departure, err := time.Parse("2006-01-02", departureStr)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid date format")
+	}
+
+	result, err := f.FlightService.GetFlightByFilter(airline, aircraft, departure)
+	if err != nil {
+		return c.String(http.StatusNotFound, "Flight Not Found!!")
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+func (f *FlightController) GetFlightBySort(c echo.Context) error {
+	price := c.Param("price")
+	departureStr := c.Param("departure")
+	durationStr := c.Param("duration")
+
+	result, err := f.FlightService.GetFlightBySort(price, departureStr, durationStr)
+	if err != nil {
+		return c.String(http.StatusNotFound, "Flight Not Found!!")
+	}
+
 	return c.JSON(http.StatusOK, result)
 }

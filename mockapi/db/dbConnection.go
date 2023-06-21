@@ -2,10 +2,11 @@ package db
 
 import (
 	"fmt"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"mockapi/models"
 	"mockapi/utils"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func GetDbConnection() *gorm.DB {
@@ -17,7 +18,7 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate(&models.Flight{})
+	err = db.AutoMigrate(&models.Flight{}, &models.FlightClass{})
 	if err != nil {
 		panic(err)
 	}

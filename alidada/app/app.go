@@ -36,8 +36,9 @@ func alidadaRouting(e *echo.Echo) {
 	// authGroup.POST("/logout", userController.Login)
 
 	// mockapi
-	e.GET("/flights", flightController.SearchFlights)
-
+	e.GET("/flights/search", flightController.SearchFlightsDay)
+	e.GET("/flights/sort", flightController.SearchFlightsSort)
+	e.GET("/flights/filter", flightController.FiletrFlights)
 }
 
 func qsmsRouting(e *echo.Echo) {

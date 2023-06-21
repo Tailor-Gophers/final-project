@@ -20,6 +20,8 @@ type FlightService interface {
 	GetDaysList() ([]string, error)
 	ReserveFlightCapacity(id int64) (*models.Flight, error)
 	ReturnFlightCapacity(id int64) (*models.Flight, error)
+	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error)
+	GetFlightBySort(price string, departure string, duration string) ([]models.Flight, error)
 }
 
 type flightService struct {
@@ -52,4 +54,12 @@ func (s *flightService) ReserveFlightCapacity(id int64) (*models.Flight, error) 
 
 func (s *flightService) ReturnFlightCapacity(id int64) (*models.Flight, error) {
 	return s.flightRepository.ReturnFlightCapacity(id)
+}
+
+func (s *flightService) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error) {
+	return s.flightRepository.GetFlightByFilter(airline, aircraft, departure)
+}
+
+func (s *flightService) GetFlightBySort(price string, departure string, duration string) ([]models.Flight, error) {
+	return s.flightRepository.GetFlightBySort(price, departure, duration)
 }

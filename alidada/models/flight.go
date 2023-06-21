@@ -10,5 +10,5 @@ type Flight struct {
 	EndTime     time.Time `json:"flight_endtime"`
 	Airline     string    `json:"flight_airline"`
 	Aircraft    string    `json:"flight_aircraft"`
-	Capacity    uint      `json:"flight_capacity"`
+	Reserve     uint      `json:"flight_reserve"`
 }

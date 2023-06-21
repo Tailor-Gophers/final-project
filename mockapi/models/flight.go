@@ -12,5 +12,6 @@ type Flight struct {
 	EndTime     time.Time `json:"flight_endtime"`
 	Airline     string    `gorm:"size:255" json:"flight_airline"`
 	Aircraft    string    `gorm:"size:255" json:"flight_aircraft"`
-	Capacity    *uint     `gorm:"null" json:"flight_capacity"`
+	Reserve     *uint     `gorm:"null" json:"flight_reserve"`
+	Price       uint      `json:"flight_price"`
 }

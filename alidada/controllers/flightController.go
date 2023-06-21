@@ -15,12 +15,62 @@ func NewFlightController() *FlightController {
 	return &FlightController{}
 }
 
-func (f *FlightController) SearchFlights(c echo.Context) error {
+func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 	origin := c.QueryParam("origin")
 	destination := c.QueryParam("destination")
 	dateStr := c.QueryParam("date")
 
 	url := fmt.Sprintf("http://localhost:3001/flights/%s/%s/%s", origin, destination, dateStr)
+	res, err := http.Get(url)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to get flights from mockapi",
+		})
+	}
+	defer res.Body.Close()
+
+	var flights []models.Flight
+	err = json.NewDecoder(res.Body).Decode(&flights)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to decode flights from mockapi response",
+		})
+	}
+
+	return c.JSON(http.StatusOK, flights)
+}
+
+func (f *FlightController) SearchFlightsSort(c echo.Context) error {
+	price := c.QueryParam("price")
+	departure := c.QueryParam("departure")
+	duration := c.QueryParam("duration")
+
+	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s/%s/%s", price, departure, duration)
+	res, err := http.Get(url)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to get flights from mockapi",
+		})
+	}
+	defer res.Body.Close()
+
+	var flights []models.Flight
+	err = json.NewDecoder(res.Body).Decode(&flights)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to decode flights from mockapi response",
+		})
+	}
+
+	return c.JSON(http.StatusOK, flights)
+}
+
+func (f *FlightController) FiletrFlights(c echo.Context) error {
+	airline := c.QueryParam("airline")
+	aircraft := c.QueryParam("aircraft")
+	departure := c.QueryParam("departure")
+
+	url := fmt.Sprintf("http://localhost:3001/flights/filter/%s/%s/%s", airline, aircraft, departure)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
