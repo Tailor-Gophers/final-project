@@ -36,3 +36,12 @@ Content-Type: application/json
   "last_name": "Shirasb",
   "phone_number": "09196985640"
 }
+
+###
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "password": "nima1234"
+}

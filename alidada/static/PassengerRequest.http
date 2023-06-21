@@ -40,5 +40,5 @@ Content-Type: application/json
 GET http://localhost:3000/api/user/passengers/Pluto
 
 ###
-GET http://localhost:3000/api/user/passengers/
-Authorization: Bearer {{auth_token}}
+GET http://localhost:3000/api/user/passengers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0MDk1NDgsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.TMVVW6NeakPYorwVLqg4B8acnX_ajlz-gpTNh9PcRNY
