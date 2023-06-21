@@ -73,11 +73,12 @@ func (f *FlightController) GetDaysList(c echo.Context) error {
 }
 
 func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Reduce Capacity
+	class := c.Param("class")
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.ReserveFlightCapacity(int64(id))
+	result, err := f.FlightService.ReserveFlightCapacity(int64(id), class)
 	if err != nil {
 		if err.Error() == "flight capacity reached" {
 			return c.String(http.StatusNotFound, "Flight capacity reached!")
@@ -88,11 +89,12 @@ func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Redu
 }
 
 func (f *FlightController) ReturnFlightCapacity(c echo.Context) error { // Increase Capacity
+	class := c.Param("class")
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.ReturnFlightCapacity(int64(id))
+	result, err := f.FlightService.ReturnFlightCapacity(int64(id), class)
 	if err != nil {
 		if err.Error() == "flight capacity is already empty" {
 			return c.String(http.StatusNotFound, "Flight capacity is already empty!")
@@ -123,19 +125,6 @@ func (f *FlightController) GetFlightByFilter(c echo.Context) error {
 func (f *FlightController) GetFlightBySort(c echo.Context) error {
 	order := c.Param("order")
 	result, err := f.FlightService.GetFlightBySort(order)
-	if err != nil {
-		return c.String(http.StatusNotFound, "Flight Not Found!!")
-	}
-
-	return c.JSON(http.StatusOK, result)
-}
-
-func (f *FlightController) GetFlightPrice(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
-	}
-	result, err := f.FlightService.GetFlightPrice(int64(id))
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
 	}

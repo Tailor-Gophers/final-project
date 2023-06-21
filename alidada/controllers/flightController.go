@@ -41,11 +41,9 @@ func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 }
 
 func (f *FlightController) SearchFlightsSort(c echo.Context) error {
-	price := c.QueryParam("price")
-	departure := c.QueryParam("departure")
-	duration := c.QueryParam("duration")
+	order := c.QueryParam("order")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s/%s/%s", price, departure, duration)
+	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s", order)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -54,15 +52,15 @@ func (f *FlightController) SearchFlightsSort(c echo.Context) error {
 	}
 	defer res.Body.Close()
 
-	var flights []models.Flight
-	err = json.NewDecoder(res.Body).Decode(&flights)
+	var flightclass []models.FlightClass
+	err = json.NewDecoder(res.Body).Decode(&flightclass)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to decode flights from mockapi response",
 		})
 	}
 
-	return c.JSON(http.StatusOK, flights)
+	return c.JSON(http.StatusOK, flightclass)
 }
 
 func (f *FlightController) FiletrFlights(c echo.Context) error {
@@ -79,13 +77,13 @@ func (f *FlightController) FiletrFlights(c echo.Context) error {
 	}
 	defer res.Body.Close()
 
-	var flights []models.Flight
-	err = json.NewDecoder(res.Body).Decode(&flights)
+	var flightclass []models.FlightClass
+	err = json.NewDecoder(res.Body).Decode(&flightclass)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to decode flights from mockapi response",
 		})
 	}
 
-	return c.JSON(http.StatusOK, flights)
+	return c.JSON(http.StatusOK, flightclass)
 }

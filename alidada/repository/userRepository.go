@@ -91,7 +91,7 @@ func (ur *userGormRepository) SaveToken(user *models.User, token string) error {
 	if err != nil {
 		return err
 	}
-	AccessToken := models.Token{UserId: user.Id, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
+	AccessToken := models.Token{UserId: user.ID, Token: hashed, ExpiresAt: time.Now().Add(time.Hour * 24)}
 
 	result := ur.db.Create(&AccessToken)
 

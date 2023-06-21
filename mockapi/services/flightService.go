@@ -18,11 +18,10 @@ type FlightService interface {
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
-	ReserveFlightCapacity(id int64) (*models.FlightClass, error)
-	ReturnFlightCapacity(id int64) (*models.FlightClass, error)
-	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error)
-	GetFlightBySort(order string) (*[]models.Flight, error)
-	GetFlightPrice(id int64) (models.FlightClass, error)
+	ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
+	GetFlightBySort(order string) (*[]models.FlightClass, error)
 }
 
 type flightService struct {
@@ -49,22 +48,18 @@ func (s *flightService) GetDaysList() ([]string, error) {
 	return s.flightRepository.GetDaysList()
 }
 
-func (s *flightService) ReserveFlightCapacity(id int64) (*models.FlightClass, error) {
-	return s.flightRepository.ReserveFlightCapacity(id)
+func (s *flightService) ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error) {
+	return s.flightRepository.ReserveFlightCapacity(id, class)
 }
 
-func (s *flightService) ReturnFlightCapacity(id int64) (*models.FlightClass, error) {
-	return s.flightRepository.ReturnFlightCapacity(id)
+func (s *flightService) ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error) {
+	return s.flightRepository.ReturnFlightCapacity(id, class)
 }
 
-func (s *flightService) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error) {
+func (s *flightService) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error) {
 	return s.flightRepository.GetFlightByFilter(airline, aircraft, departure)
 }
 
-func (s *flightService) GetFlightBySort(order string) (*[]models.Flight, error) {
+func (s *flightService) GetFlightBySort(order string) (*[]models.FlightClass, error) {
 	return s.flightRepository.GetFlightBySort(order)
-}
-
-func (s *flightService) GetFlightPrice(id int64) (models.FlightClass, error) {
-	return s.flightRepository.GetFlightPrice(id)
 }

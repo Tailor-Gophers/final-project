@@ -16,11 +16,10 @@ type FlightRepository interface {
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
-	ReserveFlightCapacity(id int64) (*models.FlightClass, error)
-	ReturnFlightCapacity(id int64) (*models.FlightClass, error)
-	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error)
-	GetFlightBySort(order string) (*[]models.Flight, error)
-	GetFlightPrice(id int64) (models.FlightClass, error)
+	ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
+	GetFlightBySort(order string) (*[]models.FlightClass, error)
 }
 
 type flightGormRepository struct {
@@ -107,9 +106,9 @@ func (fl *flightGormRepository) GetDaysList() ([]string, error) {
 	return dates, nil
 }
 
-func (fl *flightGormRepository) ReserveFlightCapacity(id int64) (*models.FlightClass, error) {
+func (fl *flightGormRepository) ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error) {
 	var flightClass *models.FlightClass
-	err := fl.db.Where("id = ?", id).First(&flightClass).Error
+	err := fl.db.Where("id = ? and title = ?", id, class).Preload("Flight").First(&flightClass).Error
 	if err != nil {
 		return nil, err
 	}
@@ -128,10 +127,9 @@ func (fl *flightGormRepository) ReserveFlightCapacity(id int64) (*models.FlightC
 	return flightClass, nil
 }
 
-func (fl *flightGormRepository) ReturnFlightCapacity(id int64) (*models.FlightClass, error) {
-
+func (fl *flightGormRepository) ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error) {
 	flightClass := &models.FlightClass{}
-	err := fl.db.Where("id = ?", id).First(&flightClass).Error
+	err := fl.db.Where("flight_id = ? and title = ?", id, class).Preload("Flight").First(&flightClass).Error
 	if err != nil {
 		return nil, err
 	}
@@ -149,14 +147,14 @@ func (fl *flightGormRepository) ReturnFlightCapacity(id int64) (*models.FlightCl
 	return flightClass, nil
 }
 
-func (fl *flightGormRepository) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.Flight, error) {
-	var flights []models.Flight
-
+func (fl *flightGormRepository) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error) {
+	var flightClass []models.FlightClass
 	result := fl.db.
-		Joins("join flight_classes on flights.id = flight_classes.flight_id").
+		Joins("join flights on flights.Id = flight_id").
 		Where("flights.airline = ? and flights.aircraft = ? and date(flights.start_time) = date(?)", airline, aircraft, departure).
-		Where("flight_classes.capacity-flights.reserve != ?", 0).
-		Find(&flights)
+		Where("capacity-reserve != ?", 0).
+		Preload("Flight").
+		Find(&flightClass)
 
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -165,22 +163,24 @@ func (fl *flightGormRepository) GetFlightByFilter(airline string, aircraft strin
 		return nil, err
 	}
 
-	return flights, nil
+	return flightClass, nil
 }
 
-func (fl *flightGormRepository) GetFlightBySort(order string) (*[]models.Flight, error) {
-	var flights []models.Flight
+func (fl *flightGormRepository) GetFlightBySort(order string) (*[]models.FlightClass, error) {
+	var flights []models.FlightClass
 	var result *gorm.DB
 
 	if order == "decs" {
 		result = fl.db.
-			Joins("join flight_classes on flights.id = flight_classes.flight_id").
+			Joins("join flights on flights.Id = flight_classes.flight_id").
 			Order("price desc, start_time, end_time-start_time").
+			Preload("Flight").
 			Find(&flights)
 	} else {
 		result = fl.db.
-			Joins("join flight_classes on flights.id = flight_classes.flight_id").
+			Joins("join flights on flights.Id = flight_classes.flight_id").
 			Order("price, start_time, end_time-start_time").
+			Preload("Flight").
 			Find(&flights)
 	}
 
