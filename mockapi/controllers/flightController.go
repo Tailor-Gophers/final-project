@@ -121,11 +121,21 @@ func (f *FlightController) GetFlightByFilter(c echo.Context) error {
 }
 
 func (f *FlightController) GetFlightBySort(c echo.Context) error {
-	price := c.Param("price")
-	departureStr := c.Param("departure")
-	durationStr := c.Param("duration")
+	order := c.Param("order")
+	result, err := f.FlightService.GetFlightBySort(order)
+	if err != nil {
+		return c.String(http.StatusNotFound, "Flight Not Found!!")
+	}
 
-	result, err := f.FlightService.GetFlightBySort(price, departureStr, durationStr)
+	return c.JSON(http.StatusOK, result)
+}
+
+func (f *FlightController) GetFlightPrice(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+	result, err := f.FlightService.GetFlightPrice(int64(id))
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
 	}
