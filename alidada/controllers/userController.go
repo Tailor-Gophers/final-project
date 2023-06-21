@@ -34,6 +34,15 @@ type loginForm struct {
 	Password string `json:"password"`
 }
 
+type passengerForm struct {
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Gender         string `json:"gender"`
+	DateOfBirth    string `json:"date_of_birth"`
+	Nationality    string `json:"nationality"`
+	PassportNumber string `json:"passport_number"`
+}
+
 func (u *UserController) Signup(c echo.Context) error {
 	signupReq := &signUpForm{}
 	err := c.Bind(&signupReq)
@@ -64,6 +73,7 @@ func (u *UserController) Signup(c echo.Context) error {
 		Password:    signupReq.Password,
 		FirstName:   signupReq.FirstName,
 		LastName:    signupReq.LastName,
+		Passengers:  []models.Passenger{},
 		PhoneNumber: signupReq.PhoneNumber,
 	}
 
@@ -72,14 +82,6 @@ func (u *UserController) Signup(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	return c.String(http.StatusCreated, "Registration was successful")
-}
-
-func validatePassword(password string) bool {
-	//Constraints
-	lengthConstraint := len(password) >= 8
-	//todo more constraints
-
-	return lengthConstraint
 }
 
 func (u *UserController) Login(c echo.Context) error {
@@ -121,9 +123,7 @@ func (u *UserController) GetUserByToken(c echo.Context) error {
 		return echo.ErrUnauthorized
 	} else {
 		return c.JSON(http.StatusOK, user)
-
 	}
-
 }
 
 func (u *UserController) LogOut(c echo.Context) error {
@@ -139,14 +139,6 @@ func (u *UserController) LogOut(c echo.Context) error {
 
 }
 
-func GetToken(c echo.Context) string {
-
-	authorization := c.Request().Header["Authorization"]
-	Bearer := authorization[0]
-	token := strings.Split(Bearer, "Bearer ")[1]
-	return token
-}
-
 func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
 	token := GetToken(c)
 	user, err := u.UserService.UserByToken(token)
@@ -154,4 +146,51 @@ func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
 		return nil, echo.ErrInternalServerError
 	}
 	return user, nil
+}
+
+func (u *UserController) CreatePassenger(c echo.Context) error {
+
+	passengerReq := &passengerForm{}
+	err := c.Bind(passengerReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "All passenger fields must be provided!")
+	}
+	newPassenger := &models.Passenger{
+		FirstName:      passengerReq.FirstName,
+		LastName:       passengerReq.LastName,
+		Gender:         passengerReq.Gender,
+		DateOfBirth:    passengerReq.DateOfBirth,
+		Nationality:    passengerReq.Nationality,
+		PassportNumber: passengerReq.PassportNumber,
+	}
+
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	return u.UserService.CreatePassenger(user, newPassenger)
+}
+
+func (u *UserController) GetPassengers(c echo.Context) error {
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	passengers, _ := u.UserService.GetPassengers(user)
+	return c.JSON(http.StatusOK, passengers)
+}
+
+func GetToken(c echo.Context) string {
+
+	authorization := c.Request().Header["Authorization"]
+	Bearer := authorization[0]
+	token := strings.Split(Bearer, "Bearer ")[1]
+	return token
+}
+func validatePassword(password string) bool {
+	//Constraints
+	lengthConstraint := len(password) >= 8
+	//todo more constraints
+
+	return lengthConstraint
 }
