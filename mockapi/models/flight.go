@@ -13,5 +13,4 @@ type Flight struct {
 	Airline     string    `gorm:"size:255" json:"flight_airline"`
 	Aircraft    string    `gorm:"size:255" json:"flight_aircraft"`
 	Reserve     *uint     `gorm:"null" json:"flight_reserve"`
-	Price       uint      `json:"flight_price"`
 }
