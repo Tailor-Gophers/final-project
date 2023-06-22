@@ -1,0 +1,110 @@
+GET http://localhost:3001/flights/1
+Content-Type: application/json
+
+{
+	"flight_id": 1,
+	"flight_origin": "Tehran",
+	"flight_destination": "Tabriz",
+	"flight_starttime": "2020-02-09T14:49:41+03:30",
+	"flight_endtime": "2020-02-09T18:49:41+03:30",
+	"flight_airline": "homa",
+	"flight_aircraft": "Boeing737"
+}
+
+###
+GET localhost:3001/flights/shiraz/tehran/2020-02-08
+Content-Type: application/json
+
+[
+	{
+		"flight_id": 2,
+		"flight_origin": "Shiraz",
+		"flight_destination": "Tehran",
+		"flight_starttime": "2020-02-08T15:49:41+03:30",
+		"flight_endtime": "2020-02-09T18:49:41+03:30",
+		"flight_airline": "homa",
+		"flight_aircraft": "Boeing737"
+	},
+	{
+		"flight_id": 3,
+		"flight_origin": "Shiraz",
+		"flight_destination": "Tehran",
+		"flight_starttime": "2020-02-08T14:49:41+03:30",
+		"flight_endtime": "2020-02-09T18:49:41+03:30",
+		"flight_airline": "homa",
+		"flight_aircraft": "Boeing737"
+	}
+]
+
+###
+GET localhost:3001/flights/planes
+Content-Type: application/json
+
+[
+	"Boeing737"
+]
+
+###
+GET localhost:3001/flights/cities
+Content-Type: application/json
+
+[
+	"Tehran",
+	"Shiraz",
+	"Tabriz"
+]
+
+###
+GET localhost:3001/flights/days
+Content-Type: application/json
+
+[
+	"2020-02-09T14:49:41+03:30",
+	"2020-02-08T15:49:41+03:30",
+	"2020-02-08T14:49:41+03:30",
+	"2020-02-09T18:49:41+03:30"
+]
+
+###
+POST localhost:3001/flights/1/class-a/return
+Content-Type: application/json
+
+{
+	"id": 1,
+	"flight_class_title": "Class-A",
+	"flight_price": 2400,
+	"flight_capacity": 50,
+	"flight_reserve": 29,
+	"FlightId": 1,
+	"Flight": {
+		"flight_id": 1,
+		"flight_origin": "Tehran",
+		"flight_destination": "Tabriz",
+		"flight_starttime": "2020-02-09T14:49:41+03:30",
+		"flight_endtime": "2020-02-09T18:49:41+03:30",
+		"flight_airline": "homa",
+		"flight_aircraft": "Boeing737"
+	}
+}
+
+###
+POST localhost:3001/flights/1/class-a/reserve
+Content-Type: application/json
+
+{
+	"id": 1,
+	"flight_class_title": "Class-A",
+	"flight_price": 2400,
+	"flight_capacity": 50,
+	"flight_reserve": 30,
+	"FlightId": 1,
+	"Flight": {
+		"flight_id": 1,
+		"flight_origin": "Tehran",
+		"flight_destination": "Tabriz",
+		"flight_starttime": "2020-02-09T14:49:41+03:30",
+		"flight_endtime": "2020-02-09T18:49:41+03:30",
+		"flight_airline": "homa",
+		"flight_aircraft": "Boeing737"
+	}
+}
