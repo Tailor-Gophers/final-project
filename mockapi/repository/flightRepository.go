@@ -20,6 +20,7 @@ type FlightRepository interface {
 	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
 	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
 	GetFlightBySort(order string) (*[]models.FlightClass, error)
+	GetFlightClassByID(id int64) (*models.FlightClass, error)
 }
 
 type flightGormRepository struct {
@@ -201,6 +202,18 @@ func (fl *flightGormRepository) GetFlightPrice(id int64) (models.FlightClass, er
 		return models.FlightClass{}, err
 	}
 	return flightC, nil
+}
+
+func (fl *flightGormRepository) GetFlightClassByID(id int64) (*models.FlightClass, error) {
+	var flightClass models.FlightClass
+	result := fl.db.Preload("Flight").First(&flightClass, id)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fmt.Errorf("flight not found")
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &flightClass, nil
 }
 
 func removeDuplicateString(strSlice []string) []string {

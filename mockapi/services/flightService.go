@@ -22,6 +22,7 @@ type FlightService interface {
 	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
 	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
 	GetFlightBySort(order string) (*[]models.FlightClass, error)
+	GetFlightClassByID(id int64) (*models.FlightClass, error)
 }
 
 type flightService struct {
@@ -62,4 +63,8 @@ func (s *flightService) GetFlightByFilter(airline string, aircraft string, depar
 
 func (s *flightService) GetFlightBySort(order string) (*[]models.FlightClass, error) {
 	return s.flightRepository.GetFlightBySort(order)
+}
+
+func (s *flightService) GetFlightClassByID(id int64) (*models.FlightClass, error) {
+	return s.flightRepository.GetFlightClassByID(id)
 }

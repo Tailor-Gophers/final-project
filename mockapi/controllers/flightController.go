@@ -131,3 +131,16 @@ func (f *FlightController) GetFlightBySort(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, result)
 }
+
+func (f *FlightController) GetFlightClassByID(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+	result, err := f.FlightService.GetFlightClassByID(int64(id))
+	if err != nil {
+		return c.String(http.StatusNotFound, "Flight CLass Not Found!!")
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
