@@ -2,6 +2,8 @@ package utils
 
 import (
 	"alidada/models"
+	"github.com/labstack/echo/v4"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -24,4 +26,11 @@ func GenerateTokenPair(user *models.User) (string, error) {
 	}
 
 	return t, nil
+}
+
+func GetToken(c echo.Context) string {
+	authorization := c.Request().Header["Authorization"]
+	Bearer := authorization[0]
+	token := strings.Split(Bearer, "Bearer ")[1]
+	return token
 }

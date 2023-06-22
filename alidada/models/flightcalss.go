@@ -6,6 +6,6 @@ type FlightClass struct {
 	Price    uint   `json:"flight_price"`
 	Capacity uint   `json:"flight_capacity"`
 	Reserve  *uint  `json:"flight_reserve"`
-	FlightId int64
+	FlightId uint
 	Flight   Flight
 }

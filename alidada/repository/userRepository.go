@@ -17,7 +17,7 @@ type UserRepository interface {
 	GetUserByEmail(username string) (*models.User, error)
 	GetUserByUserId(userId uint) (*models.User, error)
 	DeleteUser(userId uint) error
-	CreatePassenger(user *models.User, passenger *models.Passenger) error
+	CreatePassenger(passenger *models.Passenger) error
 	GetPassengers(user *models.User) ([]models.Passenger, error)
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
@@ -56,8 +56,8 @@ func (ur *userGormRepository) GetUserByEmail(email string) (*models.User, error)
 	return &user, nil
 }
 
-func (ur *userGormRepository) CreatePassenger(user *models.User, passenger *models.Passenger) error {
-	return ur.db.Save(user).Association("Passengers").Append(passenger)
+func (ur *userGormRepository) CreatePassenger(passenger *models.Passenger) error {
+	return ur.db.Create(passenger).Error
 }
 
 func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passenger, error) {
@@ -110,7 +110,8 @@ func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = ur.db.Where("id = ?", AccessToken.UserId).First(&User).Error
+	fmt.Println(AccessToken)
+	err = ur.db.Preload("Passengers").Where("id = ?", AccessToken.UserId).First(&User).Error
 	if err != nil {
 		return nil, err
 	}

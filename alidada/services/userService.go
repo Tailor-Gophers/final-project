@@ -11,7 +11,7 @@ type UserService interface {
 	GetUserByUserName(username string) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
 	DeleteUser(username string) error
-	CreatePassenger(user *models.User, passenger *models.Passenger) error
+	CreatePassenger(passenger *models.Passenger) error
 	GetPassengers(user *models.User) ([]models.Passenger, error)
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
@@ -45,8 +45,8 @@ func (s *userService) GetUserByEmail(email string) (*models.User, error) {
 	return s.userRepository.GetUserByEmail(email)
 }
 
-func (s *userService) CreatePassenger(user *models.User, passenger *models.Passenger) error {
-	return s.userRepository.CreatePassenger(user, passenger)
+func (s *userService) CreatePassenger(passenger *models.Passenger) error {
+	return s.userRepository.CreatePassenger(passenger)
 }
 
 func (s *userService) GetPassengers(user *models.User) ([]models.Passenger, error) {

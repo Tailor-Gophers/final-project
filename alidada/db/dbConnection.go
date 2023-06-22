@@ -21,5 +21,6 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
 	return db
 }

@@ -11,6 +11,6 @@ type User struct {
 	LastName    string      `gorm:"size:255" db:"last_name" json:"last_name"`
 	PhoneNumber string      `gorm:"size:11" json:"phone_number"`
 	IsAdmin     bool        `gorm:"default:false" json:"is_admin"`
-	Passengers  []Passenger `gorm:"foreignKey:ID" json:"passengers,omitempty"`
-	Tokens      []Token     `gorm:"foreignKey:ID" json:"tokens,omitempty"`
+	Passengers  []Passenger `json:"passengers,omitempty"`
+	Tokens      []Token     `json:"tokens,omitempty"`
 }

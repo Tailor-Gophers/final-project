@@ -4,10 +4,8 @@ import (
 	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
-	"net/http"
-	"strings"
-
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type UserController struct {
@@ -128,7 +126,7 @@ func (u *UserController) GetUserByToken(c echo.Context) error {
 
 func (u *UserController) LogOut(c echo.Context) error {
 
-	token := GetToken(c)
+	token := utils.GetToken(c)
 	err := u.UserService.LogOut(token)
 	if err != nil {
 		return echo.ErrUnauthorized
@@ -140,7 +138,7 @@ func (u *UserController) LogOut(c echo.Context) error {
 }
 
 func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
-	token := GetToken(c)
+	token := utils.GetToken(c)
 	user, err := u.UserService.UserByToken(token)
 	if err != nil {
 		return nil, echo.ErrInternalServerError
@@ -155,7 +153,14 @@ func (u *UserController) CreatePassenger(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, "All passenger fields must be provided!")
 	}
+
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+
 	newPassenger := &models.Passenger{
+		UserID:         user.ID,
 		FirstName:      passengerReq.FirstName,
 		LastName:       passengerReq.LastName,
 		Gender:         passengerReq.Gender,
@@ -164,11 +169,7 @@ func (u *UserController) CreatePassenger(c echo.Context) error {
 		PassportNumber: passengerReq.PassportNumber,
 	}
 
-	user, err := u.UserByToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "You must be logged in!")
-	}
-	return u.UserService.CreatePassenger(user, newPassenger)
+	return u.UserService.CreatePassenger(newPassenger)
 }
 
 func (u *UserController) GetPassengers(c echo.Context) error {
@@ -180,13 +181,6 @@ func (u *UserController) GetPassengers(c echo.Context) error {
 	return c.JSON(http.StatusOK, passengers)
 }
 
-func GetToken(c echo.Context) string {
-
-	authorization := c.Request().Header["Authorization"]
-	Bearer := authorization[0]
-	token := strings.Split(Bearer, "Bearer ")[1]
-	return token
-}
 func validatePassword(password string) bool {
 	//Constraints
 	lengthConstraint := len(password) >= 8

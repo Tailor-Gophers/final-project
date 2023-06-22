@@ -1,5 +1,6 @@
-POST http://localhost:3000/api/user/AddPassenger/Pluto
+POST http://localhost:3000/api/user/AddPassenger
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0OTU0MjUsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.SPTK8Bnrz_SQNQqe0BrTdKPDKdeGbwXqiXHq43gcydw
 
 {
   "first_name": "Navid",
@@ -11,8 +12,9 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3000/api/user/AddPassenger/Pluto
+POST http://localhost:3000/api/user/AddPassenger
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0OTU0MjUsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.SPTK8Bnrz_SQNQqe0BrTdKPDKdeGbwXqiXHq43gcydw
 
 {
   "first_name": "Behzad",
@@ -37,8 +39,9 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/api/user/passengers/Pluto
+GET http://localhost:3000/api/user/passengers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0OTU0MjUsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.SPTK8Bnrz_SQNQqe0BrTdKPDKdeGbwXqiXHq43gcydw
 
 ###
-GET http://localhost:3000/api/user/passengers
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0MDk1NDgsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.TMVVW6NeakPYorwVLqg4B8acnX_ajlz-gpTNh9PcRNY
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODc0OTU0MjUsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.SPTK8Bnrz_SQNQqe0BrTdKPDKdeGbwXqiXHq43gcydw
