@@ -6,7 +6,7 @@ type Reservation struct {
 	FlightClassID uint         `json:"-"`
 	OrderID       uint         `json:"-"`
 	Price         uint         `json:"price,omitempty"`
-	IsCancelled   bool         `json:"is_cancelled,omitempty"`
+	IsCancelled   bool         `json:"is_cancelled"`
 	FlightClass   *FlightClass `json:"flight_class,omitempty"`
 	Passenger     *Passenger   `json:"passenger,omitempty"`
 }
