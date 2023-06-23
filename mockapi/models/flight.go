@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Flight struct {
-	Id          int64     `gorm:"primaryKey;autoIncrement" json:"flight_id"`
+	gorm.Model
 	Origin      string    `gorm:"size:255" json:"flight_origin"`
 	Destination string    `json:"flight_destination"`
 	StartTime   time.Time `json:"flight_starttime"`

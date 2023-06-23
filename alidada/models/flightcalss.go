@@ -1,8 +1,10 @@
 package models
 
+import "gorm.io/gorm"
+
 type FlightClass struct {
-	Id       int64  `json:"id"`
-	Title    string `json:"flight_class_title"`
+	gorm.Model
+	Title    string `gorm:"size:255" json:"flight_class_title"`
 	Price    uint   `json:"flight_price"`
 	Capacity uint   `json:"flight_capacity"`
 	Reserve  *uint  `json:"flight_reserve"`

@@ -22,6 +22,7 @@ type UserRepository interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
+	GetMyTickets(user *models.User) ([]models.Reservation, error)
 }
 
 type userGormRepository struct {
@@ -67,6 +68,15 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 		return nil, err
 	}
 	return passengers, nil
+}
+
+func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	err := ur.db.Find(&reservations).Error
+	if err != nil {
+		return nil, err
+	}
+	return reservations, nil
 }
 
 func (ur *userGormRepository) DeleteUser(userId uint) error {

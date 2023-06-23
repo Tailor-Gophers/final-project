@@ -16,6 +16,7 @@ type UserService interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
+	GetMyTickets(user *models.User) ([]models.Reservation, error)
 }
 
 type userService struct {
@@ -52,7 +53,9 @@ func (s *userService) CreatePassenger(passenger *models.Passenger) error {
 func (s *userService) GetPassengers(user *models.User) ([]models.Passenger, error) {
 	return s.userRepository.GetPassengers(user)
 }
-
+func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+	return s.userRepository.GetMyTickets(user)
+}
 func (s *userService) SaveToken(user *models.User, token string) error {
 	return s.userRepository.SaveToken(user, token)
 }

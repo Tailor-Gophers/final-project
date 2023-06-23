@@ -4,8 +4,9 @@ import (
 	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	echo "github.com/labstack/echo/v4"
 )
 
 type UserController struct {
@@ -179,6 +180,15 @@ func (u *UserController) GetPassengers(c echo.Context) error {
 	}
 	passengers, _ := u.UserService.GetPassengers(user)
 	return c.JSON(http.StatusOK, passengers)
+}
+
+func (u *UserController) GetMyTickets(c echo.Context) error {
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	Tickets, _ := u.UserService.GetMyTickets(user)
+	return c.JSON(http.StatusOK, Tickets)
 }
 
 func validatePassword(password string) bool {

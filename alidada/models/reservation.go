@@ -9,4 +9,6 @@ type Reservation struct {
 	OrderID       uint
 	Price         uint
 	IsCancelled   bool
+	FlightClass   FlightClass
+	Passenger     Passenger
 }
