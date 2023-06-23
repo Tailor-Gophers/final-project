@@ -23,7 +23,7 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	GetMyTickets(user *models.User) ([]models.Reservation, error)
-	CancellTicket(user *models.User, id string) error
+	CancellTicket(user *models.User, id string) (string, error)
 }
 
 type userGormRepository struct {
@@ -102,28 +102,37 @@ func PenaltyCalculation(reservation *models.Reservation) (int, error) {
 		var t time.Duration
 		t = time.Duration(condition.TimeMinutes)
 		if reservation.CreatedAt.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
-			return condition.Penalty, nil
+			return condition.Penalty * int(reservation.Price), nil
 			break
 		}
 	}
-	return 100, errors.New("no conditions")
+	return 100, errors.New("None of the cancellation conditions are available for you")
 }
 
-func (ur *userGormRepository) CancellTicket(user *models.User, id string) error {
+func (ur *userGormRepository) CancellTicket(user *models.User, id string) (string, error) {
 	var reservation models.Reservation
 	err := ur.db.
 		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-		Where("reservations.id = ?", id).Preload("FlightClass").Preload("FlightClass.CancellationConditions").
+		Where("reservations.is_cancelled is null").
+		Where("reservations.id = ?", id).
+		Preload("FlightClass").
+		Preload("FlightClass.CancellationConditions").
 		First(&reservation).Error
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Println(PenaltyCalculation(&reservation))
 
-	if err != nil {
-		return err
+	penalty, err2 := PenaltyCalculation(&reservation)
+	if err2 != nil {
+		return "", err2
 	}
-	return nil
+	ur.db.Model(&models.Reservation{}).Where("id = ?", reservation.ID).Update("is_cancelled", true)
+	NewReseveNumber := int(*reservation.FlightClass.Reserve) + 1
+	ur.db.Model(&models.FlightClass{}).Where("id = ?", reservation.FlightClass.ID).Update("reserve", NewReseveNumber)
+
+	result := fmt.Sprintf("your penalty is: %d", penalty)
+
+	return result, nil
 }
 
 func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
