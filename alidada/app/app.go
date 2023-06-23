@@ -3,7 +3,7 @@ package app
 import (
 	"alidada/controllers"
 
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 type App struct {

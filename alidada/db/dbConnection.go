@@ -4,6 +4,7 @@ import (
 	"alidada/models"
 	"alidada/utils"
 	"fmt"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,7 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate(&models.User{}, &models.Passenger{}, &models.Token{})
+	err = db.AutoMigrate(&models.User{}, &models.Passenger{}, &models.Token{}, &models.Order{}, &models.Reservation{})
 	if err != nil {
 		panic(err)
 	}
