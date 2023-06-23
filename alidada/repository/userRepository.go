@@ -71,14 +71,55 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 	return passengers, nil
 }
 
+func Sort(arr *[]models.CancellationCondition, start, end int) []models.CancellationCondition {
+	if start < end {
+		partitionIndex := partition(*arr, start, end)
+		Sort(arr, start, partitionIndex-1)
+		Sort(arr, partitionIndex+1, end)
+	}
+	return *arr
+}
+
+func partition(arr []models.CancellationCondition, start, end int) int {
+	pivot := arr[end].Penalty
+	pIndex := start
+	for i := start; i < end; i++ {
+		if arr[i].Penalty <= pivot {
+			//  swap
+			arr[i], arr[pIndex] = arr[pIndex], arr[i]
+			pIndex++
+		}
+	}
+	arr[pIndex], arr[end] = arr[end], arr[pIndex]
+	return pIndex
+}
+
+func PenaltyCalculation(reservation *models.Reservation) (int, error) {
+	cancellationConditions := reservation.FlightClass.CancellationConditions
+
+	sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
+	for _, condition := range sortedCancellationConditions {
+		var t time.Duration
+		t = time.Duration(condition.TimeMinutes)
+		if reservation.CreatedAt.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
+			return condition.Penalty, nil
+			break
+		}
+	}
+	return 100, errors.New("no conditions")
+}
+
 func (ur *userGormRepository) CancellTicket(user *models.User, id string) error {
 	var reservation models.Reservation
 	err := ur.db.
 		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-		Where("reservations.id = ?", id).Preload("FlightClass").
+		Where("reservations.id = ?", id).Preload("FlightClass").Preload("FlightClass.CancellationConditions").
 		First(&reservation).Error
+	if err != nil {
+		return err
+	}
+	fmt.Println(PenaltyCalculation(&reservation))
 
-	fmt.Println(reservation.FlightClass.ID)
 	if err != nil {
 		return err
 	}
