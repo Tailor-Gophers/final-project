@@ -1,11 +1,9 @@
 package models
 
-import "gorm.io/gorm"
-
 type Passenger struct {
 	//Id             uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	gorm.Model
-	UserID         uint   `json:"user_id,omitempty"`
+	Model
+	UserID         uint   `json:"-"`
 	FirstName      string `gorm:"size:255;not null" json:"first_name,omitempty"`
 	LastName       string `gorm:"size:255;not null" json:"last_name,omitempty"`
 	Gender         string `gorm:"size:255" json:"gender,omitempty"`

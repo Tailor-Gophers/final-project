@@ -72,7 +72,11 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 
 func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
 	var reservations []models.Reservation
-	err := ur.db.Find(&reservations).Error
+	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).Select("reservations.ID", "price", "passenger_id", "flight_class_id").
+		Preload("Passenger").
+		Preload("FlightClass", func(db *gorm.DB) *gorm.DB {
+			return db.Select("ID", "Title", "flight_id")
+		}).Preload("FlightClass.Flight").Find(&reservations).Error
 	if err != nil {
 		return nil, err
 	}
