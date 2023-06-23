@@ -23,6 +23,7 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	GetMyTickets(user *models.User) ([]models.Reservation, error)
+	CancellTicket(user *models.User, id string) error
 }
 
 type userGormRepository struct {
@@ -68,6 +69,20 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 		return nil, err
 	}
 	return passengers, nil
+}
+
+func (ur *userGormRepository) CancellTicket(user *models.User, id string) error {
+	var reservation models.Reservation
+	err := ur.db.
+		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+		Where("reservations.id = ?", id).Preload("FlightClass").
+		First(&reservation).Error
+
+	fmt.Println(reservation.FlightClass.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {

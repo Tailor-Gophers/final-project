@@ -115,6 +115,19 @@ func (u *UserController) Login(c echo.Context) error {
 	return echo.ErrUnauthorized
 }
 
+func (u *UserController) CancellTicket(c echo.Context) error {
+	user, err := u.UserByToken(c)
+	reservationId := c.Param("id")
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	err2 := u.UserService.CancellTicket(user, reservationId)
+	if err2 != nil {
+		return c.String(500, "dont have permission")
+	}
+	return c.JSON(http.StatusOK, "Delete was successful")
+}
+
 func (u *UserController) GetUserByToken(c echo.Context) error {
 
 	user, err := u.UserByToken(c)
