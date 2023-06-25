@@ -27,23 +27,25 @@ func (a *App) Start(addr string) error {
 func alidadaRouting(e *echo.Echo) {
 	flightController := controllers.NewFlightController()
 	userController := controllers.NewUserController()
+	reservationController := controllers.NewReservationController()
+
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/signup", userController.Signup)
 	authGroup.POST("/login", userController.Login)
 	authGroup.GET("/me", userController.GetUserByToken)
 	authGroup.POST("/logout", userController.LogOut)
-	e.GET("/api/user/tickets", userController.GetMyTickets)
-	e.POST("/api/user/tickets/cancell/:id", userController.CancellTicket)
-	e.GET("/api/user/pdftickets/:id", userController.GetMyTicketsPdf)
+	//e.GET("/api/user/tickets", userController.GetMyTickets)
+	//e.POST("/api/user/tickets/cancell/:id", userController.CancellTicket)
+	//e.GET("/api/user/pdftickets/:id", userController.GetMyTicketsPdf)
 
-	//todo login
 	userGroup := e.Group("/api/user")
 	userGroup.GET("/passengers", userController.GetPassengers)
 	userGroup.POST("/AddPassenger", userController.CreatePassenger)
 
-	// authGroup.POST("/logout", userController.Login)
+	reservationGroup := e.Group("/api/reservation")
+	reservationGroup.POST("/reserve", reservationController.Reserve)
+	reservationGroup.GET("/verify", reservationController.Verify) //http://www.yoursite.ir/?Authority=A00000000000000000000000000202690354&Status=OK ????
 
-	// mockapi
 	e.GET("/flights/search", flightController.SearchFlightsDay)
 	e.GET("/flights/sort", flightController.SearchFlightsSort)
 	e.GET("/flights/filter", flightController.FiletrFlights)

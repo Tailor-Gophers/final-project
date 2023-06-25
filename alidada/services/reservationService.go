@@ -7,10 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type ReservationService interface {
-	Reserve(passengers []uint, flightClassId uint) error
+	Reserve(passengers []uint, flightClassId uint) (*models.Order, error)
+	SetAuthorityPair(authority string, userId uint) error
+	GetOrderByAuthority(authority string) (*models.Order, error)
+	ConfirmOrder(orderId uint, refId int) error
 }
 
 type reservationService struct {
@@ -23,34 +27,47 @@ func NewReservationService() ReservationService {
 	}
 }
 
-func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) error {
+func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*models.Order, error) {
 	var flightClass models.FlightClass
 
 	url := fmt.Sprintf("http://localhost:3001/flight_class/%d", flightClassId)
 	res, err := http.Get(url)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to get flight with id %d from mock api", flightClassId))
+		return nil, errors.New(fmt.Sprintf("Failed to get flight with id %d from mock api", flightClassId))
 	}
 	defer res.Body.Close()
 
 	err = json.NewDecoder(res.Body).Decode(&flightClass)
 
 	if int(flightClass.Capacity-*flightClass.Reserve) < len(passengers) {
-		return errors.New(fmt.Sprintf("Not enouph capacity in flight %d ", flightClassId))
+		return nil, errors.New(fmt.Sprintf("Not enouph capacity in flight %d ", flightClassId))
 	}
 
 	order := &models.Order{
 		Reservations: []models.Reservation{},
 		Price:        0,
+		OrderTime:    time.Now(),
 		Confirmed:    false,
 	}
 
 	for _, passenger := range passengers {
+
+		flightData := models.FlightData{
+			Origin:      flightClass.Flight.Origin,
+			Destination: flightClass.Flight.Destination,
+			Title:       flightClass.Title,
+			Airline:     flightClass.Flight.Airline,
+			Aircraft:    flightClass.Flight.Aircraft,
+			StartTime:   flightClass.Flight.StartTime,
+			EndTime:     flightClass.Flight.EndTime,
+		}
+
 		reservation := models.Reservation{
 			PassengerID:   passenger,
 			FlightClassID: flightClassId,
 			Price:         flightClass.Price,
 			IsCancelled:   false,
+			FlightData:    flightData,
 		}
 		order.Reservations = append(order.Reservations, reservation)
 		order.Price += reservation.Price
@@ -58,7 +75,19 @@ func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) err
 
 	err = rs.reservationRepository.PlaceOrder(order)
 	if err != nil {
-		return errors.New("failed to place order")
+		return nil, errors.New("failed to place order")
 	}
-	return err
+	return order, err
+}
+
+func (rs *reservationService) SetAuthorityPair(authority string, orderId uint) error {
+	return rs.reservationRepository.SetAuthorityPair(authority, orderId)
+}
+
+func (rs *reservationService) GetOrderByAuthority(authority string) (*models.Order, error) {
+	return rs.reservationRepository.GetOrderByAuthority(authority)
+}
+
+func (rs *reservationService) ConfirmOrder(orderId uint, refId int) error {
+	return rs.reservationRepository.ConfirmOrder(orderId, refId)
 }

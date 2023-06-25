@@ -115,18 +115,18 @@ func (u *UserController) Login(c echo.Context) error {
 	return echo.ErrUnauthorized
 }
 
-func (u *UserController) CancellTicket(c echo.Context) error {
-	user, err := u.UserByToken(c)
-	reservationId := c.Param("id")
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "You must be logged in!")
-	}
-	message, err2 := u.UserService.CancellTicket(user, reservationId)
-	if err2 != nil {
-		return c.String(500, err2.Error())
-	}
-	return c.JSON(http.StatusOK, message)
-}
+//func (u *UserController) CancellTicket(c echo.Context) error {
+//	user, err := u.UserByToken(c)
+//	reservationId := c.Param("id")
+//	if err != nil {
+//		return c.String(http.StatusUnauthorized, "You must be logged in!")
+//	}
+//	message, err2 := u.UserService.CancellTicket(user, reservationId)
+//	if err2 != nil {
+//		return c.String(500, err2.Error())
+//	}
+//	return c.JSON(http.StatusOK, message)
+//}
 
 func (u *UserController) GetUserByToken(c echo.Context) error {
 
@@ -195,28 +195,28 @@ func (u *UserController) GetPassengers(c echo.Context) error {
 	return c.JSON(http.StatusOK, passengers)
 }
 
-func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
-	user, err := u.UserByToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "You must be logged in!")
-	}
-	orderId := c.Param("id")
-
-	Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
-	if err != nil {
-		return c.String(500, err.Error())
-	}
-	return c.JSON(http.StatusOK, Tickets)
-}
-
-func (u *UserController) GetMyTickets(c echo.Context) error {
-	user, err := u.UserByToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "You must be logged in!")
-	}
-	Tickets, _ := u.UserService.GetMyTickets(user)
-	return c.JSON(http.StatusOK, Tickets)
-}
+//func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
+//	user, err := u.UserByToken(c)
+//	if err != nil {
+//		return c.String(http.StatusUnauthorized, "You must be logged in!")
+//	}
+//	orderId := c.Param("id")
+//
+//	Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
+//	if err != nil {
+//		return c.String(500, err.Error())
+//	}
+//	return c.JSON(http.StatusOK, Tickets)
+//}
+//
+//func (u *UserController) GetMyTickets(c echo.Context) error {
+//	user, err := u.UserByToken(c)
+//	if err != nil {
+//		return c.String(http.StatusUnauthorized, "You must be logged in!")
+//	}
+//	Tickets, _ := u.UserService.GetMyTickets(user)
+//	return c.JSON(http.StatusOK, Tickets)
+//}
 
 func validatePassword(password string) bool {
 	//Constraints
