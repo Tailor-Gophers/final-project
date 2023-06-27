@@ -12,8 +12,8 @@ type UserController struct {
 	UserService services.UserService
 }
 
-func NewUserController() UserController {
-	return UserController{UserService: services.NewUserService()}
+func NewUserController(service services.UserService) UserController {
+	return UserController{UserService: service}
 }
 
 type signUpForm struct {

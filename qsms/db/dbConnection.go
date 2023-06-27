@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"qsms/models"
 	"qsms/utils"
 )
 
@@ -16,7 +17,7 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate()
+	err = db.AutoMigrate(&models.User{}, &models.Token{}, &models.Transaction{}, &models.Contact{}, &models.Number{})
 	if err != nil {
 		panic(err)
 	}

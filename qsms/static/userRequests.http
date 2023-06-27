@@ -1,0 +1,56 @@
+POST http://localhost:3000/sms/user/signup
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "user_name": "Pluto",
+  "password": "nima1234"
+}
+
+###
+POST http://localhost:3000/sms/user/signup
+Content-Type: application/json
+
+{
+  "email": "pluto@gmail.com",
+  "user_name": "nima",
+  "password": "nima1234"
+}
+
+###
+GET http://localhost:3000/sms/user/login
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "password": "nima1234"
+}
+
+###
+GET http://localhost:3000/sms/user/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4Nzk1MTY4NSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.bx0AaDOV10bW931tCsHjCvmE_1wzcB8P2Q_mHc2fRuE
+
+###
+GET http://localhost:3000/sms/payment/pay/1000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4Nzk1MTY4NSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.bx0AaDOV10bW931tCsHjCvmE_1wzcB8P2Q_mHc2fRuE
+
+
+###
+POST https://sandbox.zarinpal.com/pg/v4/payment/request.json
+accept: application/json
+Content-Type: application/json
+
+{
+  "merchant_id": "7b24c23a-ebb5-11e8-8df1-005056a205be",
+  "amount": 10000,
+  "callback_url": "http://yoursite.com/verify",
+  "description": "افزایش اعتبار کاربر شماره ۱۱۳۴۶۲۹",
+  "metadata": {
+    "mobile": "09121234567",
+    "email": "info.test@gmail.com"
+  }
+}
+
+###
+
+

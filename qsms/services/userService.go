@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"qsms/models"
 	"qsms/repository"
 	"qsms/utils"
@@ -14,15 +15,16 @@ type UserService interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
+	AddBalance(userId uint, amount int) error
 }
 
 type userService struct {
 	userRepository repository.UserRepository
 }
 
-func NewUserService() UserService {
+func NewUserService(repository repository.UserRepository) UserService {
 	return &userService{
-		userRepository: repository.NewGormUserRepository(),
+		userRepository: repository,
 	}
 }
 
@@ -61,4 +63,13 @@ func (us *userService) UserByToken(token string) (*models.User, error) {
 
 func (us *userService) LogOut(token string) error {
 	return us.userRepository.LogOut(token)
+}
+
+func (us *userService) AddBalance(userId uint, amount int) error {
+	user, err := us.userRepository.GetUserById(userId)
+	if err != nil {
+		return err
+	}
+	fmt.Println(user.Balance + amount)
+	return us.userRepository.UpdateBalance(userId, user.Balance+amount)
 }

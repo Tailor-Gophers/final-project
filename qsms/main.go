@@ -1,4 +1,4 @@
-package qsms
+package main
 
 import (
 	"log"
@@ -7,5 +7,5 @@ import (
 
 func main() {
 	app := app.NewApp()
-	log.Fatalln(app.Start(":" + "3000")) // todo change port based on configs
+	log.Fatalln(app.Start(":" + "3000"))
 }

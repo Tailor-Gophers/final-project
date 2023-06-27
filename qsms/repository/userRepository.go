@@ -19,6 +19,7 @@ type UserRepository interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
+	UpdateBalance(userId uint, amount int) error
 }
 
 type userGormRepository struct {
@@ -115,4 +116,8 @@ func (ur *userGormRepository) LogOut(token string) error {
 		return err
 	}
 	return nil
+}
+
+func (ur *userGormRepository) UpdateBalance(userId uint, amount int) error {
+	return ur.db.Model(&models.User{}).Where("id = ?", userId).Update("balance", amount).Error
 }
