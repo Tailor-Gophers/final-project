@@ -1,0 +1,52 @@
+### Create Phone Book ###
+POST http://localhost:3000/sms/phonebook
+Content-Type: application/json
+
+{
+  "name": "My Phone Book"
+}
+
+### Get Phone Book By ID ###
+GET http://localhost:3000/sms/phonebook/1
+
+###
+
+### Update Phone Book ###
+PUT http://localhost:3000/sms/phonebook/1
+Content-Type: application/json
+
+{
+  "name": "Updated Phone Book"
+}
+
+###
+
+### Delete Phone Book ###
+DELETE http://localhost:3000/sms/phonebook/2
+
+###
+
+### Add Contact to Phone Book ###
+POST http://localhost:3000/sms/phonebook/1/contacts
+Content-Type: application/json
+
+{
+  "name": "Amir",
+  "phone": "+1234567890"
+}
+
+###
+
+### Delete Contact from Phone Book ###
+DELETE http://localhost:3000/sms/phonebook/1/contacts/1
+
+###
+
+### Update Contact in Phone Book ###
+PUT http://localhost:3000/sms/phonebook/1/contacts/2
+Content-Type: application/json
+
+{
+  "name": "Updated Amir",
+  "phone": "+9876543210"
+}
