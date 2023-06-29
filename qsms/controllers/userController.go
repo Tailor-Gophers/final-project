@@ -137,6 +137,14 @@ func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
 	return user, nil
 }
 
+func (u *UserController) GetPhoneNumbersToBuy(c echo.Context) error {
+	numbers, err := u.UserService.GetAvailablePhoneNumbers()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to retrieve numbers: "+err.Error())
+	}
+	return c.JSON(http.StatusOK, numbers)
+}
+
 func validatePassword(password string) bool {
 	//Constraints
 	lengthConstraint := len(password) >= 8
