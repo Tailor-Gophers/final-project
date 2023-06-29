@@ -25,12 +25,19 @@ func NewGormPhoneBookRepository() PhoneBookRepository {
 }
 
 func (pb *phoneBookGormRepository) CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error {
-	return pb.db.Model(user).Association("PhoneBooks").Append(phonebook)
+	if err := pb.db.Preload("PhoneBooks").First(user, user.ID).Error; err != nil {
+		return err
+	}
+	phonebook.UserID = user.ID
+	if err := pb.db.Create(phonebook).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (pb *phoneBookGormRepository) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {
 	var phonebook models.PhoneBook
-	err := pb.db.Preload("Contacts").First(&phonebook, phonebookId).Error
+	err := pb.db.First(&phonebook, phonebookId).Error
 	if err != nil {
 		return nil, err
 	}
