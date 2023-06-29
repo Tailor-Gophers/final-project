@@ -21,11 +21,12 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	UpdateBalance(userId uint, amount int) error
-	AddContact(user *models.User, contact models.Contact) error
+	AddContact(contact *models.Contact) error
 	DeleteContact(user *models.User, contactId uint) error
 	GetContact(contactId uint) (*models.Contact, error)
 	UpdateContact(user *models.User, contact *models.Contact) error
 	GetUserByID(userId uint) (*models.User, error)
+	GetAvailablePhoneNumbers() ([]models.Number, error)
 }
 
 type userGormRepository struct {
@@ -101,7 +102,7 @@ func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = ur.db.Preload("Number").Preload("Contacts").Where("id = ?", AccessToken.UserId).First(&User).Error
+	err = ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("Contacts").Where("id = ?", AccessToken.UserId).First(&User).Error
 	if err != nil {
 		return nil, err
 	}
@@ -128,13 +129,12 @@ func (ur *userGormRepository) UpdateBalance(userId uint, amount int) error {
 	return ur.db.Model(&models.User{}).Where("id = ?", userId).Update("balance", amount).Error
 }
 
-func (ur *userGormRepository) AddContact(user *models.User, contact models.Contact) error {
-	return ur.db.Model(user).Association("Contacts").Append(&contact)
+func (ur *userGormRepository) AddContact(contact *models.Contact) error {
+	return ur.db.Create(contact).Error
 }
 
 func (ur *userGormRepository) DeleteContact(user *models.User, contactId uint) error {
-	contact := &models.Contact{ID: contactId}
-	return ur.db.Delete(contact).Error
+	return ur.db.Delete(&models.Contact{}, contactId).Error
 }
 
 func (ur *userGormRepository) GetContact(contactId uint) (*models.Contact, error) {
@@ -158,4 +158,10 @@ func (ur *userGormRepository) GetUserByID(userId uint) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (ur *userGormRepository) GetAvailablePhoneNumbers() ([]models.Number, error) {
+	var numbers []models.Number
+	err := ur.db.Where("active = ?", 0).Find(&numbers).Error
+	return numbers, err
 }

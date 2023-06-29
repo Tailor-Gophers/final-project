@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"qsms/models"
 	"qsms/services"
+	"qsms/utils"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -11,6 +12,7 @@ import (
 
 type PhoneBookController struct {
 	PhoneBookService services.PhoneBookService
+	UserService      services.UserService
 }
 
 type createPhoneBookForm struct {
@@ -22,11 +24,18 @@ func (pb *PhoneBookController) CreatePhoneBook(c echo.Context) error {
 	if err := c.Bind(form); err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid request")
 	}
-	phoneBook := models.PhoneBook{
-		Name: form.Name,
+
+	user, err := pb.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
-	err := pb.PhoneBookService.CreatePhoneBook(&phoneBook)
+	phoneBook := models.PhoneBook{
+		UserID: user.ID,
+		Name:   form.Name,
+	}
+
+	err = pb.PhoneBookService.CreatePhoneBook(user, &phoneBook)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "Failed to create phone book")
 	}

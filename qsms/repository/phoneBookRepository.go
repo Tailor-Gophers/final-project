@@ -8,7 +8,7 @@ import (
 )
 
 type PhoneBookRepository interface {
-	CreatePhoneBook(phonebook *models.PhoneBook) error
+	CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
 	UpdatePhoneBook(phonebook *models.PhoneBook) error
 	DeletePhoneBook(phonebookId uint) error
@@ -24,8 +24,8 @@ func NewGormPhoneBookRepository() PhoneBookRepository {
 	}
 }
 
-func (pb *phoneBookGormRepository) CreatePhoneBook(phonebook *models.PhoneBook) error {
-	return pb.db.Create(phonebook).Error
+func (pb *phoneBookGormRepository) CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error {
+	return pb.db.Model(user).Association("PhoneBooks").Append(phonebook)
 }
 
 func (pb *phoneBookGormRepository) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {

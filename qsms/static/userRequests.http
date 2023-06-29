@@ -22,17 +22,20 @@ GET http://localhost:3000/sms/user/login
 Content-Type: application/json
 
 {
-  "email": "nimaebrahimi@gmail.com",
+  "email": "pluto@gmail.com",
   "password": "nima1234"
 }
 
 ###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4Nzk1MTY4NSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.bx0AaDOV10bW931tCsHjCvmE_1wzcB8P2Q_mHc2fRuE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODExNTUxNCwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.2sOSU6h1YjSsrfMUkzLVQGxVvfH-MMcytBjxz_72vqw
+
+###
+GET http://localhost:3000/sms/user/buy
 
 ###
 GET http://localhost:3000/sms/payment/pay/1000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4Nzk1MTY4NSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.bx0AaDOV10bW931tCsHjCvmE_1wzcB8P2Q_mHc2fRuE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODEwODU2MSwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.hPGr3tQlw3wPDkUNGZH9G6_YP_rrZONaC_cO0Xpc8o4
 
 
 ###

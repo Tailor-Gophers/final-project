@@ -2,8 +2,7 @@ package models
 
 type Contact struct {
 	Model
-	UserID      uint   `gorm:"not null"`
-	ID          uint   `gorm:"primaryKey;autoIncrement"`
-	Name        string `gorm:"size:255"`
+	UserID      uint
+	Name        string `gorm:"size:255" json:"name"`
 	PhoneNumber string `gorm:"size:255" json:"phone"`
 }

@@ -153,27 +153,24 @@ func validatePassword(password string) bool {
 }
 
 func (u *UserController) AddContact(c echo.Context) error {
-	userID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
-	}
 
-	user, err := u.UserService.GetUserByID(uint(userID))
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
 	form := new(createContactForm)
-	if err := c.Bind(form); err != nil {
+	if err = c.Bind(form); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 	}
 
-	contact := models.Contact{
+	contact := &models.Contact{
+		UserID:      user.ID,
 		Name:        form.Name,
 		PhoneNumber: form.PhoneNumber,
 	}
 
-	err = u.UserService.AddContact(user, contact)
+	err = u.UserService.AddContact(contact)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add contact"})
 	}

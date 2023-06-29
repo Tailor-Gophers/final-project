@@ -25,7 +25,7 @@ func NewApp() *App {
 
 	phoneBookRepository := repository.NewGormPhoneBookRepository()
 	phoneBookService := services.NewPhoneBookService(phoneBookRepository)
-	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService}
+	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService, UserService: userService}
 
 	// smsController := controllers.SMSController{PhoneBookService: phoneBookService}
 
@@ -33,8 +33,9 @@ func NewApp() *App {
 	userGroup.POST("/signup", userController.Signup)
 	userGroup.GET("/login", userController.Login)
 	userGroup.GET("/me", userController.GetUserByToken)
+	userGroup.GET("/buy", userController.GetPhoneNumbersToBuy)
 	userGroup.POST("/logout", userController.LogOut)
-	userGroup.POST("/:id/contacts", userController.AddContact)
+	userGroup.POST("/contacts/add", userController.AddContact)
 	userGroup.DELETE("/:id/contacts/:contactID", userController.DeleteContact)
 	userGroup.PUT("/:id/contacts/:contactID", userController.UpdateContact)
 

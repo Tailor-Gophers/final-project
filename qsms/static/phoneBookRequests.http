@@ -1,9 +1,10 @@
 ### Create Phone Book ###
 POST http://localhost:3000/sms/phonebook
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODEwODU2MSwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.hPGr3tQlw3wPDkUNGZH9G6_YP_rrZONaC_cO0Xpc8o4
 
 {
-  "name": "My Phone Book"
+  "name": "My Phone Book 2"
 }
 
 ### Get Phone Book By ID ###
@@ -27,12 +28,13 @@ DELETE http://localhost:3000/sms/phonebook/2
 ###
 
 ### Add Contact to Phone Book ###
-POST http://localhost:3000/sms/user/1/contacts
+POST http://localhost:3000/sms/user/contacts/add
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODExNTUxNCwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.2sOSU6h1YjSsrfMUkzLVQGxVvfH-MMcytBjxz_72vqw
 
 {
-  "name": "Amir",
-  "phone": "+1234567890"
+  "name": "Nima",
+  "phone": "+6451654845"
 }
 
 ###

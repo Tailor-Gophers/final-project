@@ -7,7 +7,7 @@ import (
 )
 
 type PhoneBookService interface {
-	CreatePhoneBook(phonebook *models.PhoneBook) error
+	CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
 	UpdatePhoneBook(phonebook *models.PhoneBook) error
 	DeletePhoneBook(phonebookId uint) error
@@ -24,8 +24,8 @@ func NewPhoneBookService(repository repository.PhoneBookRepository) PhoneBookSer
 	}
 }
 
-func (pbs *phoneBookService) CreatePhoneBook(phonebook *models.PhoneBook) error {
-	return pbs.phoneBookRepository.CreatePhoneBook(phonebook)
+func (pbs *phoneBookService) CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error {
+	return pbs.phoneBookRepository.CreatePhoneBook(user, phonebook)
 }
 
 func (pbs *phoneBookService) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {
