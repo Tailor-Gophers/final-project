@@ -27,13 +27,16 @@ func NewApp() *App {
 	phoneBookService := services.NewPhoneBookService(phoneBookRepository)
 	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService}
 
-	smsController := controllers.SMSController{PhoneBookService: phoneBookService}
+	// smsController := controllers.SMSController{PhoneBookService: phoneBookService}
 
 	userGroup := e.Group("/sms/user")
 	userGroup.POST("/signup", userController.Signup)
 	userGroup.GET("/login", userController.Login)
 	userGroup.GET("/me", userController.GetUserByToken)
 	userGroup.POST("/logout", userController.LogOut)
+	userGroup.POST("/:id/contacts", userController.AddContact)
+	userGroup.DELETE("/:id/contacts/:contactID", userController.DeleteContact)
+	userGroup.PUT("/:id/contacts/:contactID", userController.UpdateContact)
 
 	paymentGroup := e.Group("/sms/payment")
 	paymentGroup.GET("/pay/:amount", paymentController.AddBalance)
@@ -44,12 +47,9 @@ func NewApp() *App {
 	phoneBookGroup.GET("/:id", phoneBookController.GetPhoneBookByID)
 	phoneBookGroup.PUT("/:id", phoneBookController.UpdatePhoneBook)
 	phoneBookGroup.DELETE("/:id", phoneBookController.DeletePhoneBook)
-	phoneBookGroup.POST("/:id/contacts", phoneBookController.AddContact)
-	phoneBookGroup.DELETE("/:id/contacts/:contactID", phoneBookController.DeleteContact)
-	phoneBookGroup.PUT("/:id/contacts/:contactID", phoneBookController.UpdateContact)
 
-	phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
-	phoneBookGroup.POST("/send-sms/:number", smsController.SendSMSToPhoneNumbers)
+	// phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
+	// phoneBookGroup.POST("/send-sms", smsController.SendSMSToPhoneNumbers)
 
 	return &App{
 		E: e,

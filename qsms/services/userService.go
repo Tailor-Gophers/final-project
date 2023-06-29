@@ -16,6 +16,11 @@ type UserService interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	AddBalance(userId uint, amount int) error
+	AddContact(user *models.User, contact models.Contact) error
+	DeleteContact(user *models.User, contactId uint) error
+	GetContact(contactId uint) (*models.Contact, error)
+	UpdateContact(user *models.User, contact *models.Contact) error
+	GetUserByID(userId uint) (*models.User, error)
 }
 
 type userService struct {
@@ -72,4 +77,24 @@ func (us *userService) AddBalance(userId uint, amount int) error {
 	}
 	fmt.Println(user.Balance + amount)
 	return us.userRepository.UpdateBalance(userId, user.Balance+amount)
+}
+
+func (us *userService) AddContact(user *models.User, contact models.Contact) error {
+	return us.userRepository.AddContact(user, contact)
+}
+
+func (us *userService) DeleteContact(user *models.User, contactId uint) error {
+	return us.userRepository.DeleteContact(user, contactId)
+}
+
+func (us *userService) UpdateContact(user *models.User, contact *models.Contact) error {
+	return us.userRepository.UpdateContact(user, contact)
+}
+
+func (us *userService) GetContact(contactId uint) (*models.Contact, error) {
+	return us.userRepository.GetContact(contactId)
+}
+
+func (us *userService) GetUserByID(userId uint) (*models.User, error) {
+	return us.userRepository.GetUserById(userId)
 }

@@ -3,11 +3,12 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"qsms/db"
 	"qsms/models"
 	"qsms/utils"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -20,6 +21,11 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	UpdateBalance(userId uint, amount int) error
+	AddContact(user *models.User, contact models.Contact) error
+	DeleteContact(user *models.User, contactId uint) error
+	GetContact(contactId uint) (*models.Contact, error)
+	UpdateContact(user *models.User, contact *models.Contact) error
+	GetUserByID(userId uint) (*models.User, error)
 }
 
 type userGormRepository struct {
@@ -120,4 +126,36 @@ func (ur *userGormRepository) LogOut(token string) error {
 
 func (ur *userGormRepository) UpdateBalance(userId uint, amount int) error {
 	return ur.db.Model(&models.User{}).Where("id = ?", userId).Update("balance", amount).Error
+}
+
+func (ur *userGormRepository) AddContact(user *models.User, contact models.Contact) error {
+	return ur.db.Model(user).Association("Contacts").Append(&contact)
+}
+
+func (ur *userGormRepository) DeleteContact(user *models.User, contactId uint) error {
+	contact := &models.Contact{ID: contactId}
+	return ur.db.Delete(contact).Error
+}
+
+func (ur *userGormRepository) GetContact(contactId uint) (*models.Contact, error) {
+	var contact models.Contact
+	err := ur.db.First(&contact, contactId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &contact, nil
+}
+
+func (ur *userGormRepository) UpdateContact(user *models.User, contact *models.Contact) error {
+	contact.UserID = user.ID
+	return ur.db.Save(contact).Error
+}
+
+func (ur *userGormRepository) GetUserByID(userId uint) (*models.User, error) {
+	var user models.User
+	err := ur.db.Preload("Contacts").First(&user, userId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

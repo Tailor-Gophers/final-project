@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"qsms/models"
 	"qsms/services"
 	"qsms/utils"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {
@@ -26,6 +28,11 @@ type loginForm struct {
 	Email    string `json:"email"`     //optional
 	UserName string `json:"user_name"` //optional
 	Password string `json:"password"`
+}
+
+type createContactForm struct {
+	Name        string `json:"name" form:"name"`
+	PhoneNumber string `json:"phone"`
 }
 
 func (u *UserController) Signup(c echo.Context) error {
@@ -135,4 +142,94 @@ func validatePassword(password string) bool {
 	lengthConstraint := len(password) >= 8
 
 	return lengthConstraint
+}
+
+func (u *UserController) AddContact(c echo.Context) error {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+
+	user, err := u.UserService.GetUserByID(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	form := new(createContactForm)
+	if err := c.Bind(form); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	contact := models.Contact{
+		Name:        form.Name,
+		PhoneNumber: form.PhoneNumber,
+	}
+
+	err = u.UserService.AddContact(user, contact)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add contact"})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "Contact added successfully"})
+}
+
+func (u *UserController) DeleteContact(c echo.Context) error {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+
+	contactID, err := strconv.Atoi(c.Param("contactID"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+
+	user, err := u.UserService.GetUserByID(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	err = u.UserService.DeleteContact(user, uint(contactID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete contact"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Contact deleted successfully"})
+}
+
+func (u *UserController) UpdateContact(c echo.Context) error {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+
+	contactID, err := strconv.Atoi(c.Param("contactID"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+
+	user, err := u.UserService.GetUserByID(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	contact, err := u.UserService.GetContact(uint(contactID))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Contact not found"})
+	}
+
+	form := new(createContactForm)
+	if err := c.Bind(form); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	contact.Name = form.Name
+	contact.PhoneNumber = form.PhoneNumber
+
+	err = u.UserService.UpdateContact(user, contact)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update contact"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Contact updated successfully"})
 }

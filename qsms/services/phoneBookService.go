@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"qsms/models"
 	"qsms/repository"
 )
@@ -10,10 +11,7 @@ type PhoneBookService interface {
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
 	UpdatePhoneBook(phonebook *models.PhoneBook) error
 	DeletePhoneBook(phonebookId uint) error
-	AddContact(phonebook *models.PhoneBook, contact models.Contact) error
-	DeleteContact(phonebook *models.PhoneBook, contactId uint) error
-	GetContact(contactId uint) (*models.Contact, error)
-	UpdateContact(phonebook *models.PhoneBook, contact *models.Contact) error
+	SendSMS(phoneNumber string, message string) error
 }
 
 type phoneBookService struct {
@@ -42,18 +40,10 @@ func (pbs *phoneBookService) DeletePhoneBook(phonebookId uint) error {
 	return pbs.phoneBookRepository.DeletePhoneBook(phonebookId)
 }
 
-func (pbs *phoneBookService) AddContact(phonebook *models.PhoneBook, contact models.Contact) error {
-	return pbs.phoneBookRepository.AddContact(phonebook, contact)
-}
+func (pbs *phoneBookService) SendSMS(phoneNumber string, message string) error {
+	// Implementation to send an SMS to the specified phone number with the given message
 
-func (pbs *phoneBookService) DeleteContact(phonebook *models.PhoneBook, contactId uint) error {
-	return pbs.phoneBookRepository.DeleteContact(phonebook, contactId)
-}
-
-func (pbs *phoneBookService) GetContact(contactId uint) (*models.Contact, error) {
-	return pbs.phoneBookRepository.GetContact(contactId)
-}
-
-func (pbs *phoneBookService) UpdateContact(phonebook *models.PhoneBook, contact *models.Contact) error {
-	return pbs.phoneBookRepository.UpdateContact(phonebook, contact)
+	// Example implementation:
+	fmt.Printf("Sending SMS to %s: %s\n", phoneNumber, message)
+	return nil
 }

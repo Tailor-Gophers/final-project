@@ -27,7 +27,7 @@ DELETE http://localhost:3000/sms/phonebook/2
 ###
 
 ### Add Contact to Phone Book ###
-POST http://localhost:3000/sms/phonebook/1/contacts
+POST http://localhost:3000/sms/user/1/contacts
 Content-Type: application/json
 
 {
@@ -38,15 +38,32 @@ Content-Type: application/json
 ###
 
 ### Delete Contact from Phone Book ###
-DELETE http://localhost:3000/sms/phonebook/1/contacts/1
+DELETE http://localhost:3000/sms/user/1/contacts/1
 
 ###
 
 ### Update Contact in Phone Book ###
-PUT http://localhost:3000/sms/phonebook/1/contacts/2
+PUT http://localhost:3000/sms/user/1/contacts/2
 Content-Type: application/json
 
 {
   "name": "Updated Amir",
   "phone": "+9876543210"
+}
+
+### Send sms to phonebooks ###
+POST http://localhost:3000/send-sms/1,2
+Content-Type: application/json
+
+{
+  "message": "Your SMS message content"
+}
+
+### send sms to phone ###
+POST http://localhost:3000/send-sms
+Content-Type: application/json
+
+{
+  "number": "+1234567890",
+  "message": "Your SMS message content"
 }
