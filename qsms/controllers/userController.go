@@ -115,7 +115,6 @@ func (u *UserController) LogOut(c echo.Context) error {
 		return c.String(http.StatusOK, "Logout was successful")
 
 	}
-
 }
 
 func (u *UserController) GetUserByToken(c echo.Context) error {

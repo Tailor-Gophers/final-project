@@ -27,7 +27,7 @@ func NewApp() *App {
 	phoneBookService := services.NewPhoneBookService(phoneBookRepository)
 	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService, UserService: userService}
 
-	// smsController := controllers.SMSController{PhoneBookService: phoneBookService}
+	smsController := controllers.SMSController{PhoneBookService: phoneBookService}
 
 	userGroup := e.Group("/sms/user")
 	userGroup.POST("/signup", userController.Signup)
@@ -49,8 +49,8 @@ func NewApp() *App {
 	phoneBookGroup.PUT("/:id", phoneBookController.UpdatePhoneBook)
 	phoneBookGroup.DELETE("/:id", phoneBookController.DeletePhoneBook)
 
-	// phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
-	// phoneBookGroup.POST("/send-sms", smsController.SendSMSToPhoneNumbers)
+	phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
+	userGroup.POST("/send-sms", smsController.SendSMSToPhoneNumbers)
 
 	return &App{
 		E: e,

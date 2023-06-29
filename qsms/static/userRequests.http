@@ -22,14 +22,13 @@ GET http://localhost:3000/sms/user/login
 Content-Type: application/json
 
 {
-  "email": "pluto@gmail.com",
+  "email": "nimaebrahimi@gmail.com",
   "password": "nima1234"
 }
 
 ###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODExNTUxNCwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.2sOSU6h1YjSsrfMUkzLVQGxVvfH-MMcytBjxz_72vqw
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODE0OTY2NiwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Wdbb9ioMUZvsornWjKZJPn3GpGgIrUOAuTnACcOr7hM
 ###
 GET http://localhost:3000/sms/user/buy
 
@@ -56,4 +55,13 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:3000/sms/user/contacts/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODExNjk1OCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.qic1ci-0-XiOFEvc8XhjDinU4EAtYTOQO_d6sI0FLIM
+
+
+{
+  "name": "Nima",
+  "phone": "+6451654845"
+}
 
