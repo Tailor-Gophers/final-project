@@ -4,6 +4,9 @@ import (
 	"alidada/models"
 	"alidada/repository"
 	"alidada/utils"
+	"encoding/json"
+	"fmt"
+	"net/http"
 )
 
 type UserService interface {
@@ -16,7 +19,7 @@ type UserService interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
-	//GetMyTickets(user *models.User) ([]models.Reservation, error)
+	GetMyTickets(user *models.User) ([]models.Reservation, error)
 	//CancellTicket(user *models.User, id string) (string, error)
 	//GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error)
 }
@@ -56,9 +59,27 @@ func (s *userService) GetPassengers(user *models.User) ([]models.Passenger, erro
 	return s.userRepository.GetPassengers(user)
 }
 
-//func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, error) {
-//	return s.userRepository.GetMyTickets(user)
-//}
+func (s *userService) GetFlightClassByID(id string) (models.FlightClass, error) {
+	url := fmt.Sprintf("http://localhost:3001/flight_class/%s", id)
+	res, err := http.Get(url)
+	if err != nil {
+		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+	}
+	defer res.Body.Close()
+
+	var flightclass models.FlightClass
+	err = json.NewDecoder(res.Body).Decode(&flightclass)
+	if err != nil {
+		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+	}
+
+	return flightclass, nil
+}
+
+func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+	return s.userRepository.GetMyTickets(user)
+}
+
 //func (s *userService) GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error) {
 //	return s.userRepository.GetMyTicketsPdf(user, id)
 //}

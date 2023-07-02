@@ -34,9 +34,9 @@ func alidadaRouting(e *echo.Echo) {
 	authGroup.POST("/login", userController.Login)
 	authGroup.GET("/me", userController.GetUserByToken)
 	authGroup.POST("/logout", userController.LogOut)
-	//e.GET("/api/user/tickets", userController.GetMyTickets)
-	//e.POST("/api/user/tickets/cancell/:id", userController.CancellTicket)
-	//e.GET("/api/user/pdftickets/:id", userController.GetMyTicketsPdf)
+	e.GET("/api/user/tickets", userController.GetMyTickets)
+	// e.POST("/api/user/tickets/cancell/:id", userController.CancellTicket)
+	// e.GET("/api/user/pdftickets/:id", userController.GetMyTicketsPdf)
 
 	userGroup := e.Group("/api/user")
 	userGroup.GET("/passengers", userController.GetPassengers)

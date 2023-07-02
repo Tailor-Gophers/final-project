@@ -5,6 +5,7 @@ import (
 	"alidada/services"
 	"alidada/utils"
 	"net/http"
+	"strconv"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -163,6 +164,7 @@ func (u *UserController) UserByToken(c echo.Context) (*models.User, error) {
 func (u *UserController) CreatePassenger(c echo.Context) error {
 
 	passengerReq := &passengerForm{}
+	gender, _ := strconv.ParseBool(passengerReq.Gender)
 	err := c.Bind(passengerReq)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "All passenger fields must be provided!")
@@ -177,7 +179,7 @@ func (u *UserController) CreatePassenger(c echo.Context) error {
 		UserID:         user.ID,
 		FirstName:      passengerReq.FirstName,
 		LastName:       passengerReq.LastName,
-		Gender:         passengerReq.Gender,
+		Gender:         gender,
 		DateOfBirth:    passengerReq.DateOfBirth,
 		Nationality:    passengerReq.Nationality,
 		PassportNumber: passengerReq.PassportNumber,
@@ -195,28 +197,30 @@ func (u *UserController) GetPassengers(c echo.Context) error {
 	return c.JSON(http.StatusOK, passengers)
 }
 
-//func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
-//	user, err := u.UserByToken(c)
-//	if err != nil {
-//		return c.String(http.StatusUnauthorized, "You must be logged in!")
-//	}
-//	orderId := c.Param("id")
+//	func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
+//		user, err := u.UserByToken(c)
+//		if err != nil {
+//			return c.String(http.StatusUnauthorized, "You must be logged in!")
+//		}
+//		orderId := c.Param("id")
 //
-//	Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
-//	if err != nil {
-//		return c.String(500, err.Error())
+//		Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
+//		if err != nil {
+//			return c.String(500, err.Error())
+//		}
+//		return c.JSON(http.StatusOK, Tickets)
 //	}
-//	return c.JSON(http.StatusOK, Tickets)
-//}
-//
-//func (u *UserController) GetMyTickets(c echo.Context) error {
-//	user, err := u.UserByToken(c)
-//	if err != nil {
-//		return c.String(http.StatusUnauthorized, "You must be logged in!")
-//	}
-//	Tickets, _ := u.UserService.GetMyTickets(user)
-//	return c.JSON(http.StatusOK, Tickets)
-//}
+func (u *UserController) GetMyTickets(c echo.Context) error {
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	Tickets, err2 := u.UserService.GetMyTickets(user)
+	if err2 != nil {
+		return c.String(500, err2.Error())
+	}
+	return c.JSON(http.StatusOK, Tickets)
+}
 
 func validatePassword(password string) bool {
 	//Constraints

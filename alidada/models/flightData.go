@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// dont nead
 type FlightData struct {
 	Model
 	Origin      string    `gorm:"size:255" json:"origin,omitempty"`

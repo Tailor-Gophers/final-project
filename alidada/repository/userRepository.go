@@ -4,8 +4,10 @@ import (
 	"alidada/db"
 	"alidada/models"
 	"alidada/utils"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"gorm.io/gorm"
@@ -22,7 +24,8 @@ type UserRepository interface {
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
-	//GetMyTickets(user *models.User) ([]models.Reservation, error)
+	GetMyTickets(user *models.User) ([]models.Reservation, error)
+	GetFlightClassByID(id int) (models.FlightClass, error)
 	//CancellTicket(user *models.User, id string) (string, error)
 	//GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error)
 }
@@ -72,83 +75,105 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 	return passengers, nil
 }
 
-//func Sort(arr *[]models.CancellationCondition, start, end int) []models.CancellationCondition {
-//	if start < end {
-//		partitionIndex := partition(*arr, start, end)
-//		Sort(arr, start, partitionIndex-1)
-//		Sort(arr, partitionIndex+1, end)
-//	}
-//	return *arr
-//}
-//
-//func partition(arr []models.CancellationCondition, start, end int) int {
-//	pivot := arr[end].Penalty
-//	pIndex := start
-//	for i := start; i < end; i++ {
-//		if arr[i].Penalty <= pivot {
-//			//  swap
-//			arr[i], arr[pIndex] = arr[pIndex], arr[i]
-//			pIndex++
+//	func Sort(arr *[]models.CancellationCondition, start, end int) []models.CancellationCondition {
+//		if start < end {
+//			partitionIndex := partition(*arr, start, end)
+//			Sort(arr, start, partitionIndex-1)
+//			Sort(arr, partitionIndex+1, end)
 //		}
+//		return *arr
 //	}
-//	arr[pIndex], arr[end] = arr[end], arr[pIndex]
-//	return pIndex
-//}
 //
-//func PenaltyCalculation(reservation *models.Reservation) (int, error) {
-//	cancellationConditions := reservation.FlightClass.CancellationConditions
-//
-//	sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
-//	for _, condition := range sortedCancellationConditions {
-//		var t time.Duration
-//		t = time.Duration(condition.TimeMinutes)
-//		if reservation.CreatedAt.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
-//			return condition.Penalty * int(reservation.Price), nil
+//	func partition(arr []models.CancellationCondition, start, end int) int {
+//		pivot := arr[end].Penalty
+//		pIndex := start
+//		for i := start; i < end; i++ {
+//			if arr[i].Penalty <= pivot {
+//				//  swap
+//				arr[i], arr[pIndex] = arr[pIndex], arr[i]
+//				pIndex++
+//			}
 //		}
-//	}
-//	return 100, errors.New("None of the cancellation conditions are available for you")
-//}
-//
-//func (ur *userGormRepository) CancellTicket(user *models.User, id string) (string, error) {
-//	var reservation models.Reservation
-//	err := ur.db.
-//		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-//		Where("reservations.is_cancelled is null").
-//		Where("reservations.id = ?", id).
-//		Preload("FlightClass").
-//		Preload("FlightClass.CancellationConditions").
-//		First(&reservation).Error
-//	if err != nil {
-//		return "", err
+//		arr[pIndex], arr[end] = arr[end], arr[pIndex]
+//		return pIndex
 //	}
 //
-//	penalty, err2 := PenaltyCalculation(&reservation)
-//	if err2 != nil {
-//		return "", err2
-//	}
-//	ur.db.Model(&models.Reservation{}).Where("id = ?", reservation.ID).Update("is_cancelled", true)
-//	NewReseveNumber := int(*reservation.FlightClass.Reserve) + 1
-//	ur.db.Model(&models.FlightClass{}).Where("id = ?", reservation.FlightClass.ID).Update("reserve", NewReseveNumber)
+//	func PenaltyCalculation(reservation *models.Reservation) (int, error) {
+//		cancellationConditions := reservation.FlightClass.CancellationConditions
 //
-//	result := fmt.Sprintf("your penalty is: %d", penalty)
-//
-//	return result, nil
-//}
-//
-//func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
-//	var reservations []models.Reservation
-//	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-//		Select("reservations.ID", "price", "is_cancelled", "passenger_id", "flight_class_id").
-//		Preload("Passenger").
-//		Preload("FlightClass", func(db *gorm.DB) *gorm.DB {
-//			return db.Select("ID", "Title", "flight_id")
-//		}).Preload("FlightClass.Flight").Find(&reservations).Error
-//	if err != nil {
-//		return nil, err
+//		sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
+//		for _, condition := range sortedCancellationConditions {
+//			var t time.Duration
+//			t = time.Duration(condition.TimeMinutes)
+//			if reservation.CreatedAt.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
+//				return condition.Penalty * int(reservation.Price), nil
+//			}
+//		}
+//		return 100, errors.New("None of the cancellation conditions are available for you")
 //	}
 //
-//	return reservations, nil
-//}
+//	func (ur *userGormRepository) CancellTicket(user *models.User, id string) (string, error) {
+//		var reservation models.Reservation
+//		err := ur.db.
+//			Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+//			Where("reservations.is_cancelled is null").
+//			Where("reservations.id = ?", id).
+//			Preload("FlightClass").
+//			Preload("FlightClass.CancellationConditions").
+//			First(&reservation).Error
+//		if err != nil {
+//			return "", err
+//		}
+//
+//		penalty, err2 := PenaltyCalculation(&reservation)
+//		if err2 != nil {
+//			return "", err2
+//		}
+//		ur.db.Model(&models.Reservation{}).Where("id = ?", reservation.ID).Update("is_cancelled", true)
+//		NewReseveNumber := int(*reservation.FlightClass.Reserve) + 1
+//		ur.db.Model(&models.FlightClass{}).Where("id = ?", reservation.FlightClass.ID).Update("reserve", NewReseveNumber)
+//
+//		result := fmt.Sprintf("your penalty is: %d", penalty)
+//
+//		return result, nil
+//	}
+func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+		Select("reservations.ID", "price", "is_cancelled", "passenger_id", "flight_class_id").
+		Preload("Passenger").Find(&reservations).Error
+
+	for i, _ := range reservations {
+		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reservations, nil
+}
+
+func (ur *userGormRepository) GetFlightClassByID(id int) (models.FlightClass, error) {
+	url := fmt.Sprintf("http://localhost:3001/flight_class/%d", id)
+	res, err := http.Get(url)
+	if err != nil {
+		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+	}
+	defer res.Body.Close()
+
+	var flightclass models.FlightClass
+	err = json.NewDecoder(res.Body).Decode(&flightclass)
+	if err != nil {
+		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+	}
+
+	return flightclass, nil
+}
+
 //
 //func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error) {
 //	var reservations []models.Reservation
