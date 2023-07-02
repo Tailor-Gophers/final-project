@@ -52,22 +52,11 @@ func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*m
 
 	for _, passenger := range passengers {
 
-		flightData := models.FlightData{
-			Origin:      flightClass.Flight.Origin,
-			Destination: flightClass.Flight.Destination,
-			Title:       flightClass.Title,
-			Airline:     flightClass.Flight.Airline,
-			Aircraft:    flightClass.Flight.Aircraft,
-			StartTime:   flightClass.Flight.StartTime,
-			EndTime:     flightClass.Flight.EndTime,
-		}
-
 		reservation := models.Reservation{
 			PassengerID:   passenger,
 			FlightClassID: flightClassId,
 			Price:         flightClass.Price,
 			IsCancelled:   false,
-			FlightData:    flightData,
 		}
 		order.Reservations = append(order.Reservations, reservation)
 		order.Price += reservation.Price

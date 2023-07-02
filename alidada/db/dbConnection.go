@@ -11,14 +11,14 @@ import (
 
 func GetDbConnection() *gorm.DB {
 
-	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
+	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("ALIDADA_DATABASE"))
 	// Connect to the database
 
 	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate(&models.CancellationCondition{}, &models.User{}, &models.FlightData{}, &models.Passenger{}, &models.Token{}, &models.Order{}, &models.Reservation{}, &models.AuthorityPair{})
+	err = db.AutoMigrate(&models.CancellationCondition{}, &models.User{}, &models.Passenger{}, &models.Token{}, &models.Order{}, &models.Reservation{}, &models.AuthorityPair{})
 	if err != nil {
 		panic(err)
 	}

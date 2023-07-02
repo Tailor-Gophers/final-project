@@ -7,5 +7,5 @@ type Reservation struct {
 	OrderID       uint
 	Price         uint
 	IsCancelled   bool
-	FlightData    FlightData `gorm:"foreignKey:ID"`
+	Passenger     Passenger
 }
