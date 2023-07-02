@@ -144,13 +144,6 @@ func (u *UserController) GetPhoneNumbersToBuy(c echo.Context) error {
 	return c.JSON(http.StatusOK, numbers)
 }
 
-func validatePassword(password string) bool {
-	//Constraints
-	lengthConstraint := len(password) >= 8
-
-	return lengthConstraint
-}
-
 func (u *UserController) AddContact(c echo.Context) error {
 
 	user, err := u.UserService.UserByToken(utils.GetToken(c))
@@ -236,4 +229,44 @@ func (u *UserController) UpdateContact(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Contact updated successfully"})
+}
+
+func (u *UserController) SetMainNumber(c echo.Context) error {
+
+	numberId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Provide a valid number id!")
+	}
+
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	if int(user.MainNumberID) == numberId {
+		return c.String(http.StatusNotAcceptable, "User's main number id already is "+strconv.Itoa(numberId))
+	}
+
+	numberIdExists := false
+	for _, number := range user.Numbers {
+		if int(number.ID) == numberId {
+			numberIdExists = true
+		}
+	}
+	if !numberIdExists {
+		return c.String(http.StatusNotAcceptable, "User doesn't own a number with id "+strconv.Itoa(numberId))
+	}
+
+	err = u.UserService.SetMainNumber(user, uint(numberId))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return nil
+}
+
+func validatePassword(password string) bool {
+	//Constraints
+	lengthConstraint := len(password) >= 8
+
+	return lengthConstraint
 }

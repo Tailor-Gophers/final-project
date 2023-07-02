@@ -27,6 +27,7 @@ type UserRepository interface {
 	UpdateContact(user *models.User, contact *models.Contact) error
 	GetUserByID(userId uint) (*models.User, error)
 	GetAvailablePhoneNumbers() ([]models.Number, error)
+	SetMainNumber(user *models.User, numberId uint) error
 }
 
 type userGormRepository struct {
@@ -164,4 +165,8 @@ func (ur *userGormRepository) GetAvailablePhoneNumbers() ([]models.Number, error
 	var numbers []models.Number
 	err := ur.db.Where("active = ?", 0).Find(&numbers).Error
 	return numbers, err
+}
+
+func (ur *userGormRepository) SetMainNumber(user *models.User, numberId uint) error {
+	return ur.db.Model(&user).Update("MainNumberID", numberId).Error
 }

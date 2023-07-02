@@ -38,6 +38,7 @@ func NewApp() *App {
 	userGroup.POST("/contacts/add", userController.AddContact)
 	userGroup.DELETE("/:id/contacts/:contactID", userController.DeleteContact)
 	userGroup.PUT("/:id/contacts/:contactID", userController.UpdateContact)
+	userGroup.PUT("/main/:id", userController.SetMainNumber)
 
 	paymentGroup := e.Group("/sms/payment")
 	paymentGroup.GET("/pay/:amount", paymentController.AddBalance)

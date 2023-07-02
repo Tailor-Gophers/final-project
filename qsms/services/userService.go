@@ -22,6 +22,7 @@ type UserService interface {
 	UpdateContact(user *models.User, contact *models.Contact) error
 	GetUserByID(userId uint) (*models.User, error)
 	GetAvailablePhoneNumbers() ([]models.Number, error)
+	SetMainNumber(user *models.User, numberId uint) error
 }
 
 type userService struct {
@@ -102,4 +103,8 @@ func (us *userService) GetUserByID(userId uint) (*models.User, error) {
 
 func (us *userService) GetAvailablePhoneNumbers() ([]models.Number, error) {
 	return us.userRepository.GetAvailablePhoneNumbers()
+}
+
+func (us *userService) SetMainNumber(user *models.User, numberId uint) error {
+	return us.userRepository.SetMainNumber(user, numberId)
 }
