@@ -1,11 +1,11 @@
 package app
 
 import (
+	"fmt"
+	"github.com/labstack/echo/v4"
 	"qsms/controllers"
 	"qsms/repository"
 	"qsms/services"
-
-	"github.com/labstack/echo/v4"
 )
 
 type App struct {
@@ -15,9 +15,17 @@ type App struct {
 func NewApp() *App {
 	e := echo.New()
 
+	purchaseRepository := repository.NewGormPurchaseRepository()
+	purchaseService := services.NewPurchaseService(purchaseRepository)
+
+	err := purchaseService.RegisterRentingTasks()
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	userRepository := repository.NewGormUserRepository()
 	userService := services.NewUserService(userRepository)
-	userController := controllers.NewUserController(userService)
+	userController := controllers.NewUserController(userService, purchaseService)
 
 	paymentRepository := repository.NewGormPaymentRepository()
 	paymentService := services.NewPaymentService(paymentRepository)
@@ -35,6 +43,9 @@ func NewApp() *App {
 	userGroup.GET("/me", userController.GetUserByToken)
 	userGroup.GET("/buy", userController.GetPhoneNumbersToBuy)
 	userGroup.POST("/logout", userController.LogOut)
+	userGroup.PUT("/buy/:id", userController.BuyNumber)
+	userGroup.PUT("/rent/:id", userController.PlaceRent)
+	userGroup.DELETE("/dropRent/:id", userController.DropRent)
 	userGroup.POST("/contacts/add", userController.AddContact)
 	userGroup.DELETE("/:id/contacts/:contactID", userController.DeleteContact)
 	userGroup.PUT("/:id/contacts/:contactID", userController.UpdateContact)

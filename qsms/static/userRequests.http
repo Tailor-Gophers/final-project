@@ -28,9 +28,21 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODE0OTY2NiwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Wdbb9ioMUZvsornWjKZJPn3GpGgIrUOAuTnACcOr7hM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
 ###
 GET http://localhost:3000/sms/user/buy
+
+###
+PUT http://localhost:3000/sms/user/buy/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
+
+###
+PUT http://localhost:3000/sms/user/rent/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
+
+###
+DELETE http://localhost:3000/sms/user/dropRent/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
 
 ###
 GET http://localhost:3000/sms/payment/pay/1000

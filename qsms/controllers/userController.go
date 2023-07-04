@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"qsms/models"
 	"qsms/services"
@@ -11,11 +12,16 @@ import (
 )
 
 type UserController struct {
-	UserService services.UserService
+	UserService     services.UserService
+	PurchaseService services.PurchaseService
 }
 
-func NewUserController(service services.UserService) UserController {
-	return UserController{UserService: service}
+func NewUserController(userService services.UserService,
+	purchaseService services.PurchaseService) UserController {
+	return UserController{
+		UserService:     userService,
+		PurchaseService: purchaseService,
+	}
 }
 
 type signUpForm struct {
@@ -90,7 +96,7 @@ func (u *UserController) Login(c echo.Context) error {
 		user, err = u.UserService.GetUserByUserName(loginReq.UserName)
 	}
 	if err != nil {
-		return echo.ErrInternalServerError
+		return c.String(http.StatusInternalServerError, "User not found!")
 	}
 	if utils.ValidatePassword(user.Password, loginReq.Password) {
 		token, err := utils.GenerateTokenPair(user)
@@ -261,6 +267,63 @@ func (u *UserController) SetMainNumber(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+	return nil
+}
+
+func (u *UserController) BuyNumber(c echo.Context) error {
+	numberId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Provide a valid number id!")
+	}
+
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	err = u.PurchaseService.BuyNumber(user, uint(numberId))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return nil
+}
+
+func (u *UserController) PlaceRent(c echo.Context) error {
+	numberId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Provide a valid number id!")
+	}
+
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	err = u.PurchaseService.PlaceRent(user, uint(numberId))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to place rent.")
+	}
+
+	return nil
+}
+
+func (u *UserController) DropRent(c echo.Context) error {
+	rentId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Provide a valid rent id!")
+	}
+
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	fmt.Println("1")
+	err = u.PurchaseService.DropRent(user, uint(rentId))
+	if err != nil {
+		return c.String(http.StatusNotAcceptable, err.Error())
+	}
+
 	return nil
 }
 
