@@ -169,21 +169,26 @@ func (ps *purchaseService) DropRent(user *models.User, rentId uint) error {
 	if user.ID != rent.UserID {
 		return errors.New(fmt.Sprintf("User has no renting record with id %d!", rentId))
 	}
-	fmt.Println("2")
+
 	number, err := ps.purchaseRepository.GetNumberByID(rent.NumberID)
 	if err != nil {
 		return err
 	}
-	fmt.Println("3")
+
+	if user.MainNumberID == number.ID {
+		err = ps.purchaseRepository.UpdateUserMainNumber(user.ID)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = ps.purchaseRepository.RestoreNumber(number.ID)
 	if err != nil {
 		return err
 	}
-	fmt.Println("4")
 	err = ps.purchaseRepository.DropRent(rentId)
 	if err != nil {
 		return err
 	}
-	fmt.Println("5")
 	return nil
 }

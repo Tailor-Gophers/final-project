@@ -19,6 +19,7 @@ type PurchaseRepository interface {
 	GetUserById(userId uint) (*models.User, error)
 	UpdateRentDate(rentId uint, time time.Time) error
 	GetRentByID(rentId uint) (*models.Rent, error)
+	UpdateUserMainNumber(userId uint) error
 }
 
 type purchaseGormRepository struct {
@@ -84,5 +85,9 @@ func (pr *purchaseGormRepository) GetUserById(userId uint) (*models.User, error)
 }
 
 func (pr *purchaseGormRepository) UpdateRentDate(rentId uint, time time.Time) error {
-	return pr.db.Model(&models.Rent{}).Where("id = ?", rentId).Update("last_paid", time).Error
+	return pr.db.Model(&models.Rent{}).Where("id = ?", rentId).Update("LastPaid", time).Error
+}
+
+func (pr *purchaseGormRepository) UpdateUserMainNumber(userId uint) error {
+	return pr.db.Model(&models.User{}).Where("id = ?", userId).Update("MainNumberID", 0).Error
 }

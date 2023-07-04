@@ -9,7 +9,7 @@ type User struct {
 	Disable      bool        `gorm:"default:false" json:"disable"`
 	Admin        bool        `gorm:"default:false" json:"admin"`
 	MainNumberID uint        `json:"main_number_id"`
-	Numbers      []Number    `gorm:"foreignKey:UserID" json:"numbers"`
-	PhoneBooks   []PhoneBook `gorm:"foreignKey:UserID" json:"phonebooks"`
+	Numbers      []Number    `gorm:"foreignKey:ID" json:"numbers"`
+	PhoneBooks   []PhoneBook `gorm:"foreignKey:ID" json:"phonebooks"`
 	Contacts     []Contact   `json:"contacts"`
 }

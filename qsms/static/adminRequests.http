@@ -1,0 +1,26 @@
+###
+GET http://localhost:3000/sms/user/login
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "password": "nima1234"
+}
+
+###
+POST http://localhost:3000/sms/admin/addNumber
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NTc2NjQ5LCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.0huW7bj1ZPOZDg3RUvfoYDTWhaUVH-qTKpqicGfXDjE
+
+{
+  "phone_number": "+989134587287",
+  "price": 200
+}
+
+###
+PUT http://localhost:3000/sms/admin/suspend/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NTc2NjQ5LCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.0huW7bj1ZPOZDg3RUvfoYDTWhaUVH-qTKpqicGfXDjE
+
+###
+PUT http://localhost:3000/sms/admin/unsuspend/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NTc2NjQ5LCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.0huW7bj1ZPOZDg3RUvfoYDTWhaUVH-qTKpqicGfXDjE

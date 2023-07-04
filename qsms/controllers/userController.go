@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"qsms/models"
 	"qsms/services"
@@ -318,7 +317,6 @@ func (u *UserController) DropRent(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
-	fmt.Println("1")
 	err = u.PurchaseService.DropRent(user, uint(rentId))
 	if err != nil {
 		return c.String(http.StatusNotAcceptable, err.Error())

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"qsms/controllers"
+	"qsms/middlewares"
 	"qsms/repository"
 	"qsms/services"
 )
@@ -37,6 +38,10 @@ func NewApp() *App {
 
 	smsController := controllers.SMSController{PhoneBookService: phoneBookService}
 
+	adminRepository := repository.NewGormAdminRepository()
+	adminService := services.NewAdminService(adminRepository)
+	adminController := controllers.NewAdminController(adminService)
+
 	userGroup := e.Group("/sms/user")
 	userGroup.POST("/signup", userController.Signup)
 	userGroup.GET("/login", userController.Login)
@@ -60,9 +65,13 @@ func NewApp() *App {
 	phoneBookGroup.GET("/:id", phoneBookController.GetPhoneBookByID)
 	phoneBookGroup.PUT("/:id", phoneBookController.UpdatePhoneBook)
 	phoneBookGroup.DELETE("/:id", phoneBookController.DeletePhoneBook)
-
 	phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
 	userGroup.POST("/send-sms", smsController.SendSMSToPhoneNumbers)
+
+	adminGroup := e.Group("/sms/admin", middlewares.IsAdmin)
+	adminGroup.POST("/addNumber", adminController.AddNumber)
+	adminGroup.PUT("/suspend/:id", adminController.SuspendUser)
+	adminGroup.PUT("/unsuspend/:id", adminController.UnSuspendUser)
 
 	return &App{
 		E: e,
