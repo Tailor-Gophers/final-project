@@ -27,7 +27,7 @@ type UserRepository interface {
 	GetMyTickets(user *models.User) ([]models.Reservation, error)
 	GetFlightClassByID(id int) (models.FlightClass, error)
 	CancellTicket(user *models.User, id string) (string, error)
-	//GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error)
+	GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error)
 }
 
 type userGormRepository struct {
@@ -181,39 +181,26 @@ func (ur *userGormRepository) GetFlightClassByID(id int) (models.FlightClass, er
 	return flightclass, nil
 }
 
-//
-//func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error) {
-//	var reservations []models.Reservation
-//	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-//		Select("reservations.ID", "price", "passenger_id", "flight_class_id").
-//		Where("order_id = ?", id).
-//		Preload("Passenger").
-//		Preload("FlightClass", func(db *gorm.DB) *gorm.DB {
-//			return db.Select("ID", "Title", "flight_id")
-//		}).Preload("FlightClass.Flight").Find(&reservations).Error
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	pdf := gopdf.GoPdf{}
-//	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-//	pdf.AddPage()
-//	err = pdf.AddTTFFont("Shabnam", "FontsFree-Net-Vazir-Light.ttf")
-//	if err != nil {
-//		log.Print(err.Error())
-//
-//	}
-//
-//	err = pdf.SetFont("Shabnam", "", 14)
-//	if err != nil {
-//		log.Print(err.Error())
-//
-//	}
-//	pdf.Cell(nil, "تست واژگان پارسی")
-//	pdf.WritePdf("hello.pdf")
-//
-//	return reservations, nil
-//}
+func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+		Select("reservations.ID", "price", "passenger_id", "flight_class_id").
+		Where("order_id = ?", id).
+		Preload("Passenger").
+		Find(&reservations).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for i, _ := range reservations {
+		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return reservations, nil
+}
 
 func (ur *userGormRepository) DeleteUser(userId uint) error {
 	return ur.db.Delete(&models.User{}, userId).Error

@@ -197,19 +197,19 @@ func (u *UserController) GetPassengers(c echo.Context) error {
 	return c.JSON(http.StatusOK, passengers)
 }
 
-//	func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
-//		user, err := u.UserByToken(c)
-//		if err != nil {
-//			return c.String(http.StatusUnauthorized, "You must be logged in!")
-//		}
-//		orderId := c.Param("id")
-//
-//		Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
-//		if err != nil {
-//			return c.String(500, err.Error())
-//		}
-//		return c.JSON(http.StatusOK, Tickets)
-//	}
+func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
+	user, err := u.UserByToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "You must be logged in!")
+	}
+	orderId := c.Param("id")
+
+	Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	return c.JSON(http.StatusOK, Tickets)
+}
 func (u *UserController) GetMyTickets(c echo.Context) error {
 	user, err := u.UserByToken(c)
 	if err != nil {
