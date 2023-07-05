@@ -23,6 +23,8 @@ type UserService interface {
 	GetUserByID(userId uint) (*models.User, error)
 	GetAvailablePhoneNumbers() ([]models.Number, error)
 	SetMainNumber(user *models.User, numberId uint) error
+	CreateTemplate(template *models.Template) error
+	GetTemplate(templateId uint) (*models.Template, error)
 }
 
 type userService struct {
@@ -85,6 +87,10 @@ func (us *userService) AddContact(contact *models.Contact) error {
 	return us.userRepository.AddContact(contact)
 }
 
+func (us *userService) CreateTemplate(template *models.Template) error {
+	return us.userRepository.CreateTemplate(template)
+}
+
 func (us *userService) DeleteContact(user *models.User, contactId uint) error {
 	return us.userRepository.DeleteContact(user, contactId)
 }
@@ -107,4 +113,8 @@ func (us *userService) GetAvailablePhoneNumbers() ([]models.Number, error) {
 
 func (us *userService) SetMainNumber(user *models.User, numberId uint) error {
 	return us.userRepository.SetMainNumber(user, numberId)
+}
+
+func (us *userService) GetTemplate(templateId uint) (*models.Template, error) {
+	return us.userRepository.GetTemplate(templateId)
 }

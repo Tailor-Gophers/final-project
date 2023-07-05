@@ -28,7 +28,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjMyMDExLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.9UJlhH-OYK-HE7zY2_DGgAIphwYWaKyU1HpA5L1IC9M
 ###
 GET http://localhost:3000/sms/user/buy
 

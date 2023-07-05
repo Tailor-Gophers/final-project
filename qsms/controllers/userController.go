@@ -40,6 +40,10 @@ type createContactForm struct {
 	PhoneNumber string `json:"phone"`
 }
 
+type createTemplateForm struct {
+	Expression string `json:"expression"`
+}
+
 func (u *UserController) Signup(c echo.Context) error {
 	signupReq := &signUpForm{}
 	err := c.Bind(&signupReq)
@@ -234,6 +238,30 @@ func (u *UserController) UpdateContact(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Contact updated successfully"})
+}
+
+func (u *UserController) AddTemplate(c echo.Context) error {
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	body := createTemplateForm{}
+	err = c.Bind(&body)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid request body")
+	}
+
+	template := &models.Template{
+		UserID:     user.ID,
+		Expression: body.Expression,
+	}
+
+	err = u.UserService.CreateTemplate(template)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.String(http.StatusCreated, "Template created successfully!")
 }
 
 func (u *UserController) SetMainNumber(c echo.Context) error {

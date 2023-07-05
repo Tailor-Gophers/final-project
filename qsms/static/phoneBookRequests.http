@@ -1,7 +1,7 @@
 ### Create Phone Book ###
 POST http://localhost:3000/sms/phonebook
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODE0OTY2NiwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Wdbb9ioMUZvsornWjKZJPn3GpGgIrUOAuTnACcOr7hM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjMyMDExLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.9UJlhH-OYK-HE7zY2_DGgAIphwYWaKyU1HpA5L1IC9M
 
 {
   "name": "My Phone Book 2"
@@ -13,12 +13,8 @@ GET http://localhost:3000/sms/phonebook/1
 ###
 
 ### Update Phone Book ###
-PUT http://localhost:3000/sms/phonebook/1
-Content-Type: application/json
-
-{
-  "name": "Updated Phone Book"
-}
+PUT http://localhost:3000/sms/phonebook/1/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjMyMDExLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.9UJlhH-OYK-HE7zY2_DGgAIphwYWaKyU1HpA5L1IC9M
 
 ###
 

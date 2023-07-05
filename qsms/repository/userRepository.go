@@ -28,6 +28,8 @@ type UserRepository interface {
 	GetUserByID(userId uint) (*models.User, error)
 	GetAvailablePhoneNumbers() ([]models.Number, error)
 	SetMainNumber(user *models.User, numberId uint) error
+	CreateTemplate(template *models.Template) error
+	GetTemplate(templateId uint) (*models.Template, error)
 }
 
 type userGormRepository struct {
@@ -103,7 +105,8 @@ func (ur *userGormRepository) UserByToken(token string) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("Contacts").Where("id = ?", AccessToken.UserId).First(&User).Error
+	err = ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("PhoneBooks.Numbers").Preload("Contacts").Preload("Templates").
+		Where("id = ?", AccessToken.UserId).First(&User).Error
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +137,10 @@ func (ur *userGormRepository) AddContact(contact *models.Contact) error {
 	return ur.db.Create(contact).Error
 }
 
+func (ur *userGormRepository) CreateTemplate(template *models.Template) error {
+	return ur.db.Create(template).Error
+}
+
 func (ur *userGormRepository) DeleteContact(user *models.User, contactId uint) error {
 	return ur.db.Delete(&models.Contact{}, contactId).Error
 }
@@ -154,7 +161,7 @@ func (ur *userGormRepository) UpdateContact(user *models.User, contact *models.C
 
 func (ur *userGormRepository) GetUserByID(userId uint) (*models.User, error) {
 	var user models.User
-	err := ur.db.Preload("Contacts").First(&user, userId).Error
+	err := ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("PhoneBooks.Numbers").Preload("Contacts").Preload("Templates").First(&user, userId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -169,4 +176,10 @@ func (ur *userGormRepository) GetAvailablePhoneNumbers() ([]models.Number, error
 
 func (ur *userGormRepository) SetMainNumber(user *models.User, numberId uint) error {
 	return ur.db.Model(&user).Update("MainNumberID", numberId).Error
+}
+
+func (ur *userGormRepository) GetTemplate(templateId uint) (*models.Template, error) {
+	var template models.Template
+	err := ur.db.Where("id = ?", templateId).First(&template).Error
+	return &template, err
 }

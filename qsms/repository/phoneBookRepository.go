@@ -10,8 +10,9 @@ import (
 type PhoneBookRepository interface {
 	CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
-	UpdatePhoneBook(phonebook *models.PhoneBook) error
+	UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error
 	DeletePhoneBook(phonebookId uint) error
+	GetNumberByID(numberId uint) (*models.Number, error)
 }
 
 type phoneBookGormRepository struct {
@@ -37,17 +38,24 @@ func (pb *phoneBookGormRepository) CreatePhoneBook(user *models.User, phonebook 
 
 func (pb *phoneBookGormRepository) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {
 	var phonebook models.PhoneBook
-	err := pb.db.First(&phonebook, phonebookId).Error
+	err := pb.db.Model(&models.PhoneBook{}).Preload("Numbers").First(&phonebook, phonebookId).Error
 	if err != nil {
 		return nil, err
 	}
 	return &phonebook, nil
 }
 
-func (pb *phoneBookGormRepository) UpdatePhoneBook(phonebook *models.PhoneBook) error {
-	return pb.db.Save(phonebook).Error
+func (pb *phoneBookGormRepository) UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error {
+	pb.db.Model(phonebook).Association("Numbers")
+	return pb.db.Model(phonebook).Association("Numbers").Append(number)
 }
 
 func (pb *phoneBookGormRepository) DeletePhoneBook(phonebookId uint) error {
 	return pb.db.Delete(&models.PhoneBook{}, phonebookId).Error
+}
+
+func (pb *phoneBookGormRepository) GetNumberByID(numberId uint) (*models.Number, error) {
+	var number models.Number
+	err := pb.db.First(&number, numberId).Error
+	return &number, err
 }

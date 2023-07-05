@@ -36,7 +36,9 @@ func NewApp() *App {
 	phoneBookService := services.NewPhoneBookService(phoneBookRepository)
 	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService, UserService: userService}
 
-	smsController := controllers.SMSController{PhoneBookService: phoneBookService}
+	smsRepository := repository.NewGormMessageRepository()
+	smsService := services.NewMessageService(smsRepository, userRepository)
+	smsController := controllers.NewMessageController(userService, smsService)
 
 	adminRepository := repository.NewGormAdminRepository()
 	adminService := services.NewAdminService(adminRepository)
@@ -63,10 +65,12 @@ func NewApp() *App {
 	phoneBookGroup := e.Group("/sms/phonebook")
 	phoneBookGroup.POST("", phoneBookController.CreatePhoneBook)
 	phoneBookGroup.GET("/:id", phoneBookController.GetPhoneBookByID)
-	phoneBookGroup.PUT("/:id", phoneBookController.UpdatePhoneBook)
+	phoneBookGroup.PUT("/:id/:nid", phoneBookController.AddNumberToPhoneBook)
 	phoneBookGroup.DELETE("/:id", phoneBookController.DeletePhoneBook)
-	phoneBookGroup.POST("/send-sms/:phoneBookIDs", smsController.SendSMSToPhoneBooks)
-	userGroup.POST("/send-sms", smsController.SendSMSToPhoneNumbers)
+
+	smsGroup := e.Group("/sms/send")
+	smsGroup.POST("/single", smsController.SingleMessage)
+	smsGroup.POST("/periodic", smsController.PeriodicMessage)
 
 	adminGroup := e.Group("/sms/admin", middlewares.IsAdmin)
 	adminGroup.POST("/addNumber", adminController.AddNumber)

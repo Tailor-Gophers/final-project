@@ -137,6 +137,10 @@ func (ps *purchaseService) UpdateRent(userId, numberId uint) error {
 		return errors.New("user account is currently disabled")
 	}
 	if user.Balance < rent.Price {
+		err = ps.DropRent(user, rent.ID)
+		if err != nil {
+			return err
+		}
 		return errors.New(fmt.Sprintf("Low balance: you need at least %d to rent number %d", rent.Price, numberId))
 	}
 

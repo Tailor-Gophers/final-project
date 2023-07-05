@@ -11,5 +11,6 @@ type User struct {
 	MainNumberID uint        `json:"main_number_id"`
 	Numbers      []Number    `gorm:"foreignKey:ID" json:"numbers"`
 	PhoneBooks   []PhoneBook `gorm:"foreignKey:ID" json:"phonebooks"`
-	Contacts     []Contact   `json:"contacts"`
+	Contacts     []Contact   `gorm:"foreignKey:ID" json:"contacts"`
+	Templates    []Template  `gorm:"foreignKey:ID" json:"templates"`
 }

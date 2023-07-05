@@ -9,9 +9,10 @@ import (
 type PhoneBookService interface {
 	CreatePhoneBook(user *models.User, phonebook *models.PhoneBook) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
-	UpdatePhoneBook(phonebook *models.PhoneBook) error
+	UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error
 	DeletePhoneBook(phonebookId uint) error
 	SendSMS(phoneNumber string, message string) error
+	GetNumberByID(numberId uint) (*models.Number, error)
 }
 
 type phoneBookService struct {
@@ -32,8 +33,12 @@ func (pbs *phoneBookService) GetPhoneBook(phonebookId uint) (*models.PhoneBook, 
 	return pbs.phoneBookRepository.GetPhoneBook(phonebookId)
 }
 
-func (pbs *phoneBookService) UpdatePhoneBook(phonebook *models.PhoneBook) error {
-	return pbs.phoneBookRepository.UpdatePhoneBook(phonebook)
+func (pbs *phoneBookService) GetNumberByID(numberId uint) (*models.Number, error) {
+	return pbs.phoneBookRepository.GetNumberByID(numberId)
+}
+
+func (pbs *phoneBookService) UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error {
+	return pbs.phoneBookRepository.UpdatePhoneBook(phonebook, number)
 }
 
 func (pbs *phoneBookService) DeletePhoneBook(phonebookId uint) error {

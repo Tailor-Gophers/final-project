@@ -1,52 +1,234 @@
 package controllers
 
 import (
-	"net/http"
-	"qsms/services"
-	"strconv"
-	"strings"
-
+	"errors"
 	"github.com/labstack/echo/v4"
+	"net/http"
+	"qsms/models"
+	"qsms/services"
+	"qsms/utils"
+	"regexp"
 )
 
-type SMSController struct {
-	PhoneBookService services.PhoneBookService
-	UserService      services.UserService
+type MessageController struct {
+	UserService    services.UserService
+	MessageService services.MessageService
 }
 
-func (sms *SMSController) SendSMSToPhoneBooks(c echo.Context) error {
-	phoneBookIDs := c.Param("phoneBookIDs")
+func NewMessageController(UserService services.UserService, MessageService services.MessageService) MessageController {
+	return MessageController{
+		UserService:    UserService,
+		MessageService: MessageService,
+	}
+}
 
-	for _, phoneBookID := range strings.Split(phoneBookIDs, ",") {
-		id, err := strconv.Atoi(phoneBookID)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, "Invalid phone book ID")
-		}
+type simpleRequestForm struct {
+	//Only one of these fields must be provided!
+	Numbers      []string `json:"numbers"`
+	ContactIDs   []int    `json:"contact_ids"`
+	PhonebookIDs []int    `json:"phonebook_ids"`
+	Text         string   `json:"text"`
+	TemplateID   int      `json:"template_id"`
+}
 
-		phoneBook, err := sms.PhoneBookService.GetPhoneBook(uint(id))
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, "Error while retrieving phone book")
-		}
+type periodicRequestForm struct {
+	Numbers      []string `json:"numbers"`
+	ContactIDs   []int    `json:"contact_ids"`
+	PhonebookIDs []int    `json:"phonebook_ids"`
+	Text         string   `json:"text"`
+	TemplateID   int      `json:"template_id"`
+	Interval     string   `json:"interval"`
+}
 
-		for _, numbers := range phoneBook.Numbers {
-			phoneNumber := numbers.PhoneNumber
+func (sms *MessageController) SingleMessage(c echo.Context) error {
+	user, err := sms.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
 
-			err := sms.PhoneBookService.SendSMS(phoneNumber, "Your SMS message content")
+	body := simpleRequestForm{}
+	err = c.Bind(&body)
+
+	if user.MainNumberID == 0 {
+		return c.String(http.StatusNotAcceptable, "User has no main number set!")
+	}
+
+	if body.Text != "" {
+		for _, number := range body.Numbers {
+			err = sms.MessageService.SendSimpleMessage(user, number, body.Text)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, "Error while sending SMS")
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, contactId := range body.ContactIDs {
+			contact, err := getUserContact(user, uint(contactId))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			err = sms.MessageService.SendSimpleMessage(user, contact.PhoneNumber, body.Text)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, phonebookID := range body.PhonebookIDs {
+			phoneBook, err := getUserPhonebook(user, uint(phonebookID))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			for _, number := range phoneBook.Numbers {
+				err = sms.MessageService.SendSimpleMessage(user, number.PhoneNumber, body.Text)
+				if err != nil {
+					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+				}
+			}
+		}
+	} else if body.TemplateID != 0 {
+
+		template, err := sms.UserService.GetTemplate(uint(body.TemplateID))
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Failed to get template: "+err.Error())
+		}
+
+		if template.UserID != user.ID {
+			return c.String(http.StatusNotAcceptable, "User has no template with this id!")
+		}
+
+		for _, number := range body.Numbers {
+			err = sms.MessageService.SendTemplateMessage(user, number, template.Expression)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, contactId := range body.ContactIDs {
+			contact, err := getUserContact(user, uint(contactId))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			err = sms.MessageService.SendTemplateMessage(user, contact.PhoneNumber, template.Expression)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, phonebookID := range body.PhonebookIDs {
+			phoneBook, err := getUserPhonebook(user, uint(phonebookID))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			for _, number := range phoneBook.Numbers {
+				err = sms.MessageService.SendTemplateMessage(user, number.PhoneNumber, template.Expression)
+				if err != nil {
+					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+				}
 			}
 		}
 	}
-	return c.JSON(http.StatusOK, "SMS sent successfully")
+	return nil
 }
 
-func (sms *SMSController) SendSMSToPhoneNumbers(c echo.Context) error {
-	phoneNumber := c.FormValue("number")
-	message := c.FormValue("message")
-	_, _ = phoneNumber, message
+func (sms *MessageController) PeriodicMessage(c echo.Context) error {
+	user, err := sms.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
 
-	// TODO: Implement the logic to send an SMS to the specified phone number using phoneNumber and message
+	body := periodicRequestForm{}
+	err = c.Bind(&body)
 
-	// Return a JSON response indicating success
-	return c.JSON(http.StatusOK, "SMS sent successfully")
+	if user.MainNumberID == 0 {
+		return c.String(http.StatusNotAcceptable, "User has no main number set!")
+	}
+
+	pattern := `^(?:[1-9]|[1-9][0-9]|100)[mhdM]$`
+	regex := regexp.MustCompile(pattern)
+	if !regex.MatchString(body.Interval) {
+		return c.String(http.StatusBadRequest, "Invalid interval form.")
+	}
+
+	if body.Text != "" {
+		for _, number := range body.Numbers {
+			err = sms.MessageService.SendPeriodicSimpleMessage(user, number, body.Text, body.Interval)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, contactId := range body.ContactIDs {
+			contact, err := getUserContact(user, uint(contactId))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			err = sms.MessageService.SendPeriodicSimpleMessage(user, contact.PhoneNumber, body.Text, body.Interval)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, phonebookID := range body.PhonebookIDs {
+			phoneBook, err := getUserPhonebook(user, uint(phonebookID))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			for _, number := range phoneBook.Numbers {
+				err = sms.MessageService.SendPeriodicSimpleMessage(user, number.PhoneNumber, body.Text, body.Interval)
+				if err != nil {
+					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+				}
+			}
+		}
+	} else if body.TemplateID != 0 {
+
+		template, err := sms.UserService.GetTemplate(uint(body.TemplateID))
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Failed to get template: "+err.Error())
+		}
+
+		if template.UserID != user.ID {
+			return c.String(http.StatusNotAcceptable, "User has no template with this id!")
+		}
+
+		for _, number := range body.Numbers {
+			err = sms.MessageService.SendPeriodicTemplateMessage(user, number, template.Expression, body.Interval)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, contactId := range body.ContactIDs {
+			contact, err := getUserContact(user, uint(contactId))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			err = sms.MessageService.SendPeriodicSimpleMessage(user, contact.PhoneNumber, template.Expression, body.Interval)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+			}
+		}
+		for _, phonebookID := range body.PhonebookIDs {
+			phoneBook, err := getUserPhonebook(user, uint(phonebookID))
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+			for _, number := range phoneBook.Numbers {
+				err = sms.MessageService.SendPeriodicTemplateMessage(user, number.PhoneNumber, template.Expression, body.Interval)
+				if err != nil {
+					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func getUserContact(user *models.User, contactId uint) (models.Contact, error) {
+	for _, contact := range user.Contacts {
+		if contact.ID == contactId {
+			return contact, nil
+		}
+	}
+	return models.Contact{}, errors.New("contact not found for user")
+}
+func getUserPhonebook(user *models.User, phonebookId uint) (models.PhoneBook, error) {
+	for _, phoneBook := range user.PhoneBooks {
+		if phoneBook.ID == phonebookId {
+			return phoneBook, nil
+		}
+	}
+	return models.PhoneBook{}, errors.New("phonebook not found for user")
 }

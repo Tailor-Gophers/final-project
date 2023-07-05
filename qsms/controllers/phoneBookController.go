@@ -56,29 +56,48 @@ func (pb *PhoneBookController) GetPhoneBookByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (pb *PhoneBookController) UpdatePhoneBook(c echo.Context) error {
-	form := new(createPhoneBookForm)
-	if err := c.Bind(form); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+func (pb *PhoneBookController) AddNumberToPhoneBook(c echo.Context) error {
+
+	user, err := pb.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
 	phonebookID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
+		return c.String(http.StatusBadRequest, "Invalid PhoneBook ID")
+	}
+	numberID, err := strconv.Atoi(c.Param("nid"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid Number ID")
+	}
+
+	idExists := false
+	for _, book := range user.PhoneBooks {
+		if int(book.ID) == phonebookID {
+			idExists = true
+			break
+		}
+	}
+	if !idExists {
+		return c.String(http.StatusBadRequest, "User has no phonebook with this id!")
 	}
 
 	phonebook, err := pb.PhoneBookService.GetPhoneBook(uint(phonebookID))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Phonebook not found"})
+		return err
 	}
 
-	phonebook.Name = form.Name
+	number, err := pb.PhoneBookService.GetNumberByID(uint(numberID))
+	if err != nil {
+		return err
+	}
 
-	if err := pb.PhoneBookService.UpdatePhoneBook(phonebook); err != nil {
+	if err = pb.PhoneBookService.UpdatePhoneBook(phonebook, number); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update phonebook"})
 	}
 
-	return c.JSON(http.StatusOK, phonebook)
+	return c.String(http.StatusOK, "Number added successfully!")
 }
 
 func (pb *PhoneBookController) DeletePhoneBook(c echo.Context) error {
