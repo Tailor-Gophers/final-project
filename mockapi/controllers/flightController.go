@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 type FlightController struct {
@@ -73,12 +73,11 @@ func (f *FlightController) GetDaysList(c echo.Context) error {
 }
 
 func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Reduce Capacity
-	class := c.Param("class")
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.ReserveFlightCapacity(int64(id), class)
+	result, err := f.FlightService.ReserveFlightCapacity(int64(id))
 	if err != nil {
 		if err.Error() == "flight capacity reached" {
 			return c.String(http.StatusNotFound, "Flight capacity reached!")
@@ -89,12 +88,11 @@ func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Redu
 }
 
 func (f *FlightController) ReturnFlightCapacity(c echo.Context) error { // Increase Capacity
-	class := c.Param("class")
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.ReturnFlightCapacity(int64(id), class)
+	result, err := f.FlightService.ReturnFlightCapacity(int64(id))
 	if err != nil {
 		if err.Error() == "flight capacity is already empty" {
 			return c.String(http.StatusNotFound, "Flight capacity is already empty!")

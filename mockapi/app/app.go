@@ -32,14 +32,14 @@ func routing(e *echo.Echo) {
 	FlightController := controllers.FlightController{FlightService: FlightService}
 
 	// Public routes
-	e.GET("/flights/:id", FlightController.GetFlightByID)
-	e.GET("/flights/:origin/:destination/:date", FlightController.GetFlightByDate)
-	e.GET("/flights/planes", FlightController.GetPlanesList)
-	e.GET("/flights/cities", FlightController.GetCitiesList)
-	e.GET("/flights/days", FlightController.GetDaysList)
-	e.POST("/flights/:id/:class/reserve", FlightController.ReserveFlightCapacity)
-	e.POST("/flights/:id/:class/return", FlightController.ReturnFlightCapacity)
-	e.GET("/flights/filter/:airline/:aircraft/:departure", FlightController.GetFlightByFilter)
+	e.GET("/flights/:id", FlightController.GetFlightByID)                          //ok
+	e.GET("/flights/:origin/:destination/:date", FlightController.GetFlightByDate) //ok
+	e.GET("/flights/planes", FlightController.GetPlanesList)                       // ok
+	e.GET("/flights/cities", FlightController.GetCitiesList)                       //edit
+	e.GET("/flights/days", FlightController.GetDaysList)                           //edit
+	e.POST("/flights/:id/reserve", FlightController.ReserveFlightCapacity)
+	e.POST("/flights/:id/return", FlightController.ReturnFlightCapacity)
+	e.GET("/flights/filter/:airline/:aircraft/:departure", FlightController.GetFlightByFilter) //edit optional field
 	e.GET("/flights/sort/:order", FlightController.GetFlightBySort)
 	e.GET("/flight_class/:id", FlightController.GetFlightClassByID)
 }

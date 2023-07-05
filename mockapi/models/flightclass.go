@@ -1,13 +1,12 @@
 package models
 
-import "gorm.io/gorm"
-
 type FlightClass struct {
-	gorm.Model
-	Title    string `gorm:"size:255" json:"flight_class_title"`
-	Price    uint   `json:"flight_price"`
-	Capacity uint   `json:"flight_capacity"`
-	Reserve  *uint  `json:"flight_reserve"`
-	FlightId uint
-	Flight   Flight
+	Model
+	Title    string  `gorm:"size:255" json:"flight_class_title,omitempty"`
+	Price    uint    `json:"flight_price,omitempty"`
+	Capacity uint    `json:"flight_capacity,omitempty"`
+	Reserve  *uint   `json:"flight_reserve,omitempty"`
+	FlightId uint    `json:"-"`
+	Flight   *Flight `json:"flight,omitempty"`
+	//CancellationConditions []CancellationCondition `gorm:"many2many:flight_classcancellation_conditions;" json:"CancellationConditions,omitempty"`
 }

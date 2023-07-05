@@ -18,8 +18,8 @@ type FlightService interface {
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
-	ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error)
-	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	ReserveFlightCapacity(id int64) (*models.FlightClass, error)
+	ReturnFlightCapacity(id int64) (*models.FlightClass, error)
 	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
 	GetFlightBySort(order string) (*[]models.FlightClass, error)
 	GetFlightClassByID(id int64) (*models.FlightClass, error)
@@ -49,12 +49,12 @@ func (s *flightService) GetDaysList() ([]string, error) {
 	return s.flightRepository.GetDaysList()
 }
 
-func (s *flightService) ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error) {
-	return s.flightRepository.ReserveFlightCapacity(id, class)
+func (s *flightService) ReserveFlightCapacity(id int64) (*models.FlightClass, error) {
+	return s.flightRepository.ReserveFlightCapacity(id)
 }
 
-func (s *flightService) ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error) {
-	return s.flightRepository.ReturnFlightCapacity(id, class)
+func (s *flightService) ReturnFlightCapacity(id int64) (*models.FlightClass, error) {
+	return s.flightRepository.ReturnFlightCapacity(id)
 }
 
 func (s *flightService) GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error) {

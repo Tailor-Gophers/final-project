@@ -16,8 +16,8 @@ type FlightRepository interface {
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
-	ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error)
-	ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error)
+	ReserveFlightCapacity(id int64) (*models.FlightClass, error)
+	ReturnFlightCapacity(id int64) (*models.FlightClass, error)
 	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
 	GetFlightBySort(order string) (*[]models.FlightClass, error)
 	GetFlightClassByID(id int64) (*models.FlightClass, error)
@@ -107,9 +107,9 @@ func (fl *flightGormRepository) GetDaysList() ([]string, error) {
 	return dates, nil
 }
 
-func (fl *flightGormRepository) ReserveFlightCapacity(id int64, class string) (*models.FlightClass, error) {
+func (fl *flightGormRepository) ReserveFlightCapacity(id int64) (*models.FlightClass, error) {
 	var flightClass *models.FlightClass
-	err := fl.db.Where("id = ? and title = ?", id, class).Preload("Flight").First(&flightClass).Error
+	err := fl.db.Where("id = ?", id).Preload("Flight").First(&flightClass).Error
 	if err != nil {
 		return nil, err
 	}
@@ -128,9 +128,9 @@ func (fl *flightGormRepository) ReserveFlightCapacity(id int64, class string) (*
 	return flightClass, nil
 }
 
-func (fl *flightGormRepository) ReturnFlightCapacity(id int64, class string) (*models.FlightClass, error) {
+func (fl *flightGormRepository) ReturnFlightCapacity(id int64) (*models.FlightClass, error) {
 	flightClass := &models.FlightClass{}
-	err := fl.db.Where("flight_id = ? and title = ?", id, class).Preload("Flight").First(&flightClass).Error
+	err := fl.db.Where("flight_id = ?", id).Preload("Flight").First(&flightClass).Error
 	if err != nil {
 		return nil, err
 	}
