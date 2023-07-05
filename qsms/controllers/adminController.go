@@ -20,6 +20,9 @@ type numberRequestForm struct {
 	PhoneNumber string `json:"phone_number"`
 	Price       int    `json:"price"`
 }
+type searchRequestForm struct {
+	Words []string `json:"words"`
+}
 
 func (ac *AdminController) AddNumber(c echo.Context) error {
 	body := numberRequestForm{}
@@ -66,4 +69,28 @@ func (ac *AdminController) UnSuspendUser(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Failed to unsuspend user: "+err.Error())
 	}
 	return c.String(http.StatusOK, "User unsuspended successfully!")
+}
+
+func (ac *AdminController) CountUserMessages(c echo.Context) error {
+	userId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Provide a valid user id!")
+	}
+
+	count, err := ac.AdminService.CountUserMessages(uint(userId))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]int{"user_id": userId, "message_count": count})
+}
+
+func (ac *AdminController) SearchMessages(c echo.Context) error {
+	body := searchRequestForm{}
+	err := c.Bind(&body)
+
+	messageFound, err := ac.AdminService.SearchMessages(body.Words)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to search messages: "+err.Error())
+	}
+	return c.JSON(http.StatusOK, messageFound)
 }

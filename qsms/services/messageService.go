@@ -1,11 +1,14 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-co-op/gocron"
+	"os"
 	"qsms/models"
 	"qsms/repository"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -24,8 +27,34 @@ type messageService struct {
 	UserRepository    repository.UserRepository
 }
 
+type Words struct {
+	Words []string `json:"words"`
+}
+
+var regex *regexp.Regexp
+
 func NewMessageService(messageRepository repository.MessageRepository,
 	userRepository repository.UserRepository) MessageService {
+
+	data, err := os.ReadFile("./bad_words.json")
+	if err != nil {
+		fmt.Println("Error while reading bad_words.json: ", err)
+	}
+	var badWords Words
+	err = json.Unmarshal(data, &badWords)
+	if err != nil {
+		fmt.Println("Error while converting bad_words.json: ", err)
+	}
+
+	escapedWords := make([]string, len(badWords.Words))
+	for i, word := range badWords.Words {
+		escapedWords[i] = regexp.QuoteMeta(word)
+	}
+	patternFromWords := "(" + regexp.QuoteMeta(escapedWords[0]) + ")" + "\\b" + fmt.Sprintf("|(%s)\\b", escapedWords[1:])
+	pattern := "\\b(" + patternFromWords + ")\\b"
+
+	regex = regexp.MustCompile(pattern)
+
 	return &messageService{
 		MessageRepository: messageRepository,
 		UserRepository:    userRepository,
@@ -49,7 +78,9 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 		return err
 	}
 
-	//todo check for bad words
+	if CheckBadWords(text) {
+		return errors.New("can't send message: contains bad words")
+	}
 
 	//todo make a request to mock
 	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
@@ -80,7 +111,9 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 
 	text := GenerateTextFromTemplate(user, template)
 
-	//todo check for bad words
+	if CheckBadWords(text) {
+		return errors.New("can't send message: contains bad words")
+	}
 
 	//todo make a request to mock
 	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
@@ -218,4 +251,11 @@ func ScheduleWithParser(interval string) *gocron.Scheduler {
 		return s.Every(24 * numb).Days()
 	}
 	return s
+}
+
+func CheckBadWords(text string) bool {
+	if regex.MatchString(text) {
+		return true
+	}
+	return false
 }

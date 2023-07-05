@@ -40,6 +40,11 @@ func NewApp() *App {
 	smsService := services.NewMessageService(smsRepository, userRepository)
 	smsController := controllers.NewMessageController(userService, smsService)
 
+	err = smsService.RegisterMessagingSchedules()
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	adminRepository := repository.NewGormAdminRepository()
 	adminService := services.NewAdminService(adminRepository)
 	adminController := controllers.NewAdminController(adminService)
@@ -76,6 +81,8 @@ func NewApp() *App {
 	adminGroup.POST("/addNumber", adminController.AddNumber)
 	adminGroup.PUT("/suspend/:id", adminController.SuspendUser)
 	adminGroup.PUT("/unsuspend/:id", adminController.UnSuspendUser)
+	adminGroup.GET("/count/:id", adminController.CountUserMessages)
+	adminGroup.GET("/search", adminController.SearchMessages)
 
 	return &App{
 		E: e,
