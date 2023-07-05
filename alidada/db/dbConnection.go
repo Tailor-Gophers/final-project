@@ -5,6 +5,7 @@ import (
 	"alidada/utils"
 	"fmt"
 
+	redis "github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -24,4 +25,16 @@ func GetDbConnection() *gorm.DB {
 	}
 
 	return db
+}
+
+func GetRedisConnection() *redis.Client {
+	redisURI := fmt.Sprintf("localhost:%s", utils.ENV("REDIS_PORT"))
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     redisURI,
+		Password: utils.ENV("REDIS_PASSWORD"),
+		DB:       1,
+	})
+
+	return rdb
+
 }

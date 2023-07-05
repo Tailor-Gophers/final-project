@@ -4,11 +4,14 @@ import (
 	"alidada/db"
 	"alidada/models"
 	"alidada/utils"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
+
+	redis "github.com/redis/go-redis/v9"
 
 	"github.com/johnfercher/maroto/pkg/consts"
 	"github.com/johnfercher/maroto/pkg/pdf"
@@ -168,20 +171,49 @@ func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservat
 }
 
 func (ur *userGormRepository) GetFlightClassByID(id int) (models.FlightClass, error) {
-	url := fmt.Sprintf("http://localhost:3001/flight_class/%d", id)
-	res, err := http.Get(url)
-	if err != nil {
-		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
-	}
-	defer res.Body.Close()
-
+	ctx := context.Background()
+	rdb := db.GetRedisConnection()
+	key := fmt.Sprintf("flightClass_%d", id)
+	val, err := rdb.Get(ctx, key).Result()
 	var flightclass models.FlightClass
-	err = json.NewDecoder(res.Body).Decode(&flightclass)
+
+	if err == redis.Nil {
+		//key does not exist
+		fmt.Println(1)
+		url := fmt.Sprintf("http://localhost:3001/flight_class/%d", id)
+
+		res, err := http.Get(url)
+		if err != nil {
+			return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+		}
+		defer res.Body.Close()
+
+		err = json.NewDecoder(res.Body).Decode(&flightclass)
+		if err != nil {
+			return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+		}
+
+		flightclassMarshal, _ := json.Marshal(flightclass)
+
+		err2 := rdb.Set(ctx, key, flightclassMarshal, 100000000000).Err()
+		if err2 != nil {
+			return models.FlightClass{}, fmt.Errorf("cant Saving to redis")
+		}
+		return flightclass, nil
+	}
 	if err != nil {
-		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
+		fmt.Println(2)
+
+		return models.FlightClass{}, fmt.Errorf("redis error")
+
 	}
 
+	err = json.Unmarshal([]byte(val), &flightclass)
+	if err != nil {
+		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from redis")
+	}
 	return flightclass, nil
+
 }
 
 func GeneratePdf(reservations []models.Reservation, saveTo string) error {
