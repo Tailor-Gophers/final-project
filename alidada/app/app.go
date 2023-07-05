@@ -28,6 +28,7 @@ func alidadaRouting(e *echo.Echo) {
 	flightController := controllers.NewFlightController()
 	userController := controllers.NewUserController()
 	reservationController := controllers.NewReservationController()
+	e.Static("/pdf", "pdf")
 
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/signup", userController.Signup)

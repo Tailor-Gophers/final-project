@@ -10,6 +10,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/johnfercher/maroto/pkg/consts"
+	"github.com/johnfercher/maroto/pkg/pdf"
+	"github.com/johnfercher/maroto/pkg/props"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +30,7 @@ type UserRepository interface {
 	GetMyTickets(user *models.User) ([]models.Reservation, error)
 	GetFlightClassByID(id int) (models.FlightClass, error)
 	CancellTicket(user *models.User, id string) (string, error)
-	GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error)
+	GetMyTicketsPdf(user *models.User, id string) (string, error)
 }
 
 type userGormRepository struct {
@@ -147,7 +150,7 @@ func (ur *userGormRepository) CancellTicket(user *models.User, id string) (strin
 func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
 	var reservations []models.Reservation
 	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-		Select("reservations.ID", "price", "is_cancelled", "passenger_id", "flight_class_id").
+		Select("*").
 		Preload("Passenger").Find(&reservations).Error
 
 	for i, _ := range reservations {
@@ -181,7 +184,104 @@ func (ur *userGormRepository) GetFlightClassByID(id int) (models.FlightClass, er
 	return flightclass, nil
 }
 
-func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) ([]models.Reservation, error) {
+func GeneratePdf(reservations []models.Reservation, saveTo string) error {
+	m := pdf.NewMaroto(consts.Portrait, consts.Letter)
+	//m.SetBorder(true)
+	m.AddUTF8Font("Shabnam", consts.Normal, "Shabnam.ttf")
+	for i, reservation := range reservations {
+
+		m.Row(40, func() {
+			m.Col(4, func() {
+				_ = m.FileImage("static/airplane.png", props.Rect{
+					Center:  true,
+					Percent: 80,
+				})
+			})
+
+			m.Col(4, func() {
+				m.Text(" Ali Dada Airlines | Tailor Gopher, Inc. ", props.Text{
+					Top:         12,
+					Size:        20,
+					Family:      "Shabnam",
+					Extrapolate: true,
+				})
+
+				m.Text("Automatic ticket issuing system", props.Text{
+					Size: 12,
+					Top:  22,
+				})
+			})
+			m.ColSpace(4)
+		})
+
+		m.Line(10)
+		col1 := fmt.Sprintf("%d- Name: %s %s | Date of birth: %s | National code: %s | Passport : %s ", i+1, reservation.Passenger.FirstName, reservation.Passenger.LastName, reservation.Passenger.DateOfBirth, reservation.Passenger.Nationality, reservation.Passenger.PassportNumber)
+		col2 := fmt.Sprintf("https://Alidada.com/passenger/%d", reservation.PassengerID)
+		col3 := fmt.Sprintf("https://Alidada.com/reservation/%d", reservation.ID)
+		col4 := fmt.Sprintf("CODE: %d | DATE: %s | Origin: %s | Destination: %s ", reservation.FlightClass.ID, reservation.FlightClass.Flight.StartTime.Format("2006-01-02 15:04:05"), reservation.FlightClass.Flight.Origin, reservation.FlightClass.Flight.Destination)
+
+		m.Row(40, func() {
+			m.Col(4, func() {
+				m.Text(col1, props.Text{
+					Size:   15,
+					Top:    12,
+					Family: "Shabnam",
+				})
+			})
+			m.ColSpace(4)
+			m.Col(4, func() {
+				m.QrCode(col2, props.Rect{
+					Center:  true,
+					Percent: 75,
+				})
+			})
+		})
+
+		m.Line(10)
+
+		m.Row(100, func() {
+			m.Col(12, func() {
+				_ = m.Barcode(col3, props.Barcode{
+					Center:  true,
+					Percent: 70,
+				})
+				m.Text("AliDada . com", props.Text{
+					Size:  20,
+					Align: consts.Center,
+					Top:   65,
+				})
+			})
+		})
+
+		m.SetBorder(true)
+
+		m.Row(40, func() {
+			m.Col(6, func() {
+				m.Text(col4, props.Text{
+					Size: 15,
+					Top:  14,
+				})
+			})
+			m.Col(6, func() {
+				m.Text(reservation.FlightClass.Title, props.Text{
+					Top:   1,
+					Size:  50,
+					Align: consts.Center,
+				})
+			})
+		})
+
+		m.SetBorder(false)
+
+	}
+	err2 := m.OutputFileAndClose(saveTo)
+	if err2 != nil {
+		return fmt.Errorf("pdf cant build")
+	}
+	return nil
+}
+
+func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (string, error) {
 	var reservations []models.Reservation
 	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
 		Select("reservations.ID", "price", "passenger_id", "flight_class_id").
@@ -189,19 +289,21 @@ func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) ([]m
 		Preload("Passenger").
 		Find(&reservations).Error
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	for i, _ := range reservations {
 		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 	}
+	saveTo := fmt.Sprintf("pdf/ticketsOfOrder%s.pdf", id)
 
-	return reservations, nil
+	GeneratePdf(reservations, saveTo)
+
+	return saveTo, nil
 }
-
 func (ur *userGormRepository) DeleteUser(userId uint) error {
 	return ur.db.Delete(&models.User{}, userId).Error
 }

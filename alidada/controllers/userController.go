@@ -4,6 +4,7 @@ import (
 	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -204,11 +205,13 @@ func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
 	}
 	orderId := c.Param("id")
 
-	Tickets, err := u.UserService.GetMyTicketsPdf(user, orderId)
+	pdfAdr, err := u.UserService.GetMyTicketsPdf(user, orderId)
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	return c.JSON(http.StatusOK, Tickets)
+	redirectTo := fmt.Sprintf("%s/%s", utils.ENV("URL"), pdfAdr)
+
+	return c.JSON(http.StatusOK, redirectTo)
 }
 func (u *UserController) GetMyTickets(c echo.Context) error {
 	user, err := u.UserByToken(c)
