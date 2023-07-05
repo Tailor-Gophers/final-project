@@ -292,6 +292,10 @@ func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (str
 		return "", err
 	}
 
+	if len(reservations) == 0 {
+		return "", fmt.Errorf("not found")
+	}
+
 	for i, _ := range reservations {
 		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
