@@ -5,6 +5,7 @@ import (
 	"alidada/models"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"gorm.io/gorm"
 )
@@ -56,7 +57,24 @@ func (rr *reservationGormRepository) GetOrderByAuthority(authority string) (*mod
 }
 
 func (rr *reservationGormRepository) ConfirmOrder(orderId uint, refId int) error {
-	rr.db.Model(&models.Reservation{}).Where("order_id = ?", orderId).Updates(map[string]interface{}{"confirmed": true})
-	return rr.db.Model(&models.Order{}).Where("id = ?", orderId).Updates(map[string]interface{}{"ref_id": refId, "confirmed": true}).Error
+
+	err := rr.db.Model(&models.Reservation{}).Where("order_id = ?", orderId).Updates(map[string]interface{}{"confirmed": true}).Error
+	if err != nil {
+		return err
+	}
+	err = rr.db.Model(&models.Order{}).Where("id = ?", orderId).Updates(map[string]interface{}{"ref_id": refId, "confirmed": true}).Error
+	if err != nil {
+		return err
+	}
+	var reservations []models.Reservation
+	rr.db.Where("order_id = ?", orderId).Find(&reservations)
+
+	url := fmt.Sprintf("http://localhost:3001/flights/%d/reserve/%d", reservations[0].FlightClassID, len(reservations))
+	res, err := http.Post(url, "", nil)
+	if err != nil {
+		return fmt.Errorf("Failed to reserve flights from mockapi")
+	}
+	defer res.Body.Close()
+	return nil
 
 }

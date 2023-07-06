@@ -31,7 +31,6 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	GetMyTickets(user *models.User) ([]models.Reservation, error)
-	GetFlightClassByID(id int) (models.FlightClass, error)
 	CancellTicket(user *models.User, id string) (string, error)
 	GetMyTicketsPdf(user *models.User, id string) (string, error)
 }
@@ -117,7 +116,7 @@ func (ur *userGormRepository) PenaltyCalculation(reservation *models.Reservation
 		Find(&cancellationConditions)
 
 	sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
-	flightclass, err := ur.GetFlightClassByID(int(reservation.FlightClassID))
+	flightclass, err := GetFlightClassByID(int(reservation.FlightClassID))
 	if err != nil {
 		errors.New("Failed to decode flights from mockapi")
 	}
@@ -167,7 +166,7 @@ func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservat
 		Preload("Passenger").Find(&reservations).Error
 
 	for i, _ := range reservations {
-		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
+		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +179,7 @@ func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservat
 	return reservations, nil
 }
 
-func (ur *userGormRepository) GetFlightClassByID(id int) (models.FlightClass, error) {
+func GetFlightClassByID(id int) (models.FlightClass, error) {
 	ctx := context.Background()
 	rdb := db.GetRedisConnection()
 	key := fmt.Sprintf("flightClass_%d", id)
@@ -341,7 +340,7 @@ func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (str
 	}
 
 	for i, _ := range reservations {
-		reservations[i].FlightClass, err = ur.GetFlightClassByID(int(reservations[i].FlightClassID))
+		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
 			return "", err
 		}
