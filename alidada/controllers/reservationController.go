@@ -94,7 +94,7 @@ func (rc *ReservationController) Verify(c echo.Context) error {
 		if statusCode == 101 {
 			return c.String(500, "Payment is already verified")
 		}
-		return c.String(200, "payment cancelled ")
+		return c.String(200, "payment was failed ")
 	}
 
 	refIDInt, _ := strconv.ParseInt(refID, 10, 0)

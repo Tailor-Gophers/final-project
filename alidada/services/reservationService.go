@@ -42,6 +42,10 @@ func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*m
 	if int(flightClass.Capacity-*flightClass.Reserve) < len(passengers) {
 		return nil, errors.New(fmt.Sprintf("Not enouph capacity in flight %d ", flightClassId))
 	}
+	err = rs.reservationRepository.CanReserve(passengers, flightClassId)
+	if err != nil {
+		return nil, err
+	}
 
 	order := &models.Order{
 		Reservations: []models.Reservation{},

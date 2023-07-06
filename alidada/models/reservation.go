@@ -8,5 +8,6 @@ type Reservation struct {
 	Price         uint
 	IsCancelled   bool
 	Passenger     Passenger
+	Confirmed     bool        `gorm:"default:false"`
 	FlightClass   FlightClass `gorm:"-:migration"`
 }

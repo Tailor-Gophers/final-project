@@ -3,6 +3,8 @@ package repository
 import (
 	"alidada/db"
 	"alidada/models"
+	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -12,6 +14,7 @@ type ReservationRepository interface {
 	SetAuthorityPair(authority string, id uint) error
 	GetOrderByAuthority(authority string) (*models.Order, error)
 	ConfirmOrder(order uint, refId int) error
+	CanReserve(passengers []uint, flightClassId uint) error
 }
 type reservationGormRepository struct {
 	db *gorm.DB
@@ -25,6 +28,17 @@ func NewGormReservationRepository() ReservationRepository {
 
 func (rr *reservationGormRepository) PlaceOrder(order *models.Order) error {
 	return rr.db.Create(order).Error
+}
+
+func (rr *reservationGormRepository) CanReserve(passengers []uint, flightClassId uint) error {
+	var reservation models.Reservation
+	err := rr.db.Where("passenger_id IN ?", passengers).Where("flight_class_id = ?", flightClassId).Where("confirmed =?", true).First(&reservation).Error
+	fmt.Println(reservation)
+	if err == nil {
+		return errors.New(fmt.Sprintf("reservation alredy exist : id:%d", reservation.PassengerID))
+	} else {
+		return nil
+	}
 }
 
 func (rr *reservationGormRepository) SetAuthorityPair(authority string, id uint) error {
@@ -42,5 +56,7 @@ func (rr *reservationGormRepository) GetOrderByAuthority(authority string) (*mod
 }
 
 func (rr *reservationGormRepository) ConfirmOrder(orderId uint, refId int) error {
-	return rr.db.Model(&models.Order{}).Where("id = ", orderId).Updates(map[string]interface{}{"ref_id": refId, "confirmed": true}).Error
+	rr.db.Model(&models.Reservation{}).Where("order_id = ?", orderId).Updates(map[string]interface{}{"confirmed": true})
+	return rr.db.Model(&models.Order{}).Where("id = ?", orderId).Updates(map[string]interface{}{"ref_id": refId, "confirmed": true}).Error
+
 }
