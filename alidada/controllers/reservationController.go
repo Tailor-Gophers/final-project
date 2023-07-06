@@ -7,9 +7,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/labstack/echo/v4"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	echo "github.com/labstack/echo/v4"
 )
 
 type ReservationController struct {
@@ -45,9 +48,9 @@ func (rc *ReservationController) Reserve(c echo.Context) error {
 			if id == passenger.ID {
 				exists = true
 			}
-			if !exists {
-				return c.String(http.StatusBadRequest, "Passenger not found in user's passengers")
-			}
+		}
+		if !exists {
+			return c.String(http.StatusBadRequest, fmt.Sprintf("Passenger id %d not found in user's passengers", id))
 		}
 	}
 
@@ -57,54 +60,21 @@ func (rc *ReservationController) Reserve(c echo.Context) error {
 		return c.String(http.StatusNotAcceptable, err.Error())
 	}
 
-	paymentRequest := models.Payment{
-		MerchantID:  utils.ENV("MERCHANT_ID"),
-		Amount:      int(order.Price),
-		Description: "Reservation payment!",
-		CallbackURL: "http://localhost:3000/api/reservation/verify",
-	}
-
-	jsonData, err := json.Marshal(&paymentRequest)
+	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), true)
 	if err != nil {
-		return echo.ErrInternalServerError
+		return c.String(500, err.Error())
 	}
 
-	request, err := http.NewRequest("POST", "https://sandbox.zarinpal.com/pg/v4/payment/request.json", bytes.NewBuffer(jsonData))
-	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
+	paymentURL, authority, statusCode, err := zarinPay.NewPaymentRequest(int(order.Price), "http://localhost:3000/api/reservation/verify", fmt.Sprintf("order id %d", order.ID), user.Email, user.PhoneNumber)
 	if err != nil {
-		return echo.ErrInternalServerError
+		if statusCode == -3 {
+			return c.String(500, "Amount is not accepted in banking system")
+		}
+		log.Fatal(err)
 	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return echo.ErrInternalServerError
-	}
-
-	var paymentResponse models.PaymentResponse
-	err = json.Unmarshal(body, &paymentResponse)
-	if err != nil {
-		return echo.ErrInternalServerError
-	}
-
-	if paymentResponse.Data.Code != 100 {
-		return c.String(http.StatusBadGateway, "Failed to send payment!")
-	}
-
-	err = rc.ReservationService.SetAuthorityPair(paymentResponse.Data.Authority, order.ID)
-	if err != nil {
-		return err
-	}
-
-	err = c.Redirect(http.StatusOK, "https://sandbox.zarinpal.com/pg/StartPay/"+paymentResponse.Data.Authority)
-	if err != nil {
-		return c.String(http.StatusBadGateway, "Failed to redirect to payment page!")
-	}
-
-	return err
+	log.Println(authority)  // Save authority in DB
+	log.Println(paymentURL) // Send user to paymentURL
+	return c.String(200, paymentURL)
 }
 
 func (rc *ReservationController) Verify(c echo.Context) error {
