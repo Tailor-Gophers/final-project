@@ -117,10 +117,14 @@ func (ur *userGormRepository) PenaltyCalculation(reservation *models.Reservation
 		Find(&cancellationConditions)
 
 	sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
+	flightclass, err := ur.GetFlightClassByID(int(reservation.FlightClassID))
+	if err != nil {
+		errors.New("Failed to decode flights from mockapi")
+	}
 	for _, condition := range sortedCancellationConditions {
 		var t time.Duration
 		t = time.Duration(condition.TimeMinutes)
-		if reservation.CreatedAt.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
+		if flightclass.Flight.StartTime.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
 			return condition.Penalty * int(reservation.Price) / 100, nil
 		}
 	}
@@ -131,7 +135,8 @@ func (ur *userGormRepository) CancellTicket(user *models.User, id string) (strin
 	var reservation models.Reservation
 	err := ur.db.
 		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-		Where("reservations.is_cancelled is null").
+		Where("confirmed =?", true).
+		Where("reservations.is_cancelled != 1").
 		Where("reservations.id = ?", id).
 		First(&reservation).Error
 	if err != nil {
@@ -158,7 +163,7 @@ func (ur *userGormRepository) CancellTicket(user *models.User, id string) (strin
 func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
 	var reservations []models.Reservation
 	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
-		Select("*").
+		Select("reservations.*").Where("confirmed =?", true).
 		Preload("Passenger").Find(&reservations).Error
 
 	for i, _ := range reservations {
@@ -323,6 +328,8 @@ func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (str
 	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
 		Select("reservations.ID", "price", "passenger_id", "flight_class_id").
 		Where("order_id = ?", id).
+		Where("confirmed =?", true).
+		Where("is_cancelled != 1").
 		Preload("Passenger").
 		Find(&reservations).Error
 	if err != nil {
