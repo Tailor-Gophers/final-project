@@ -185,7 +185,12 @@ func (u *UserController) CreatePassenger(c echo.Context) error {
 		PassportNumber: passengerReq.PassportNumber,
 	}
 
-	return u.UserService.CreatePassenger(newPassenger)
+	err = u.UserService.CreatePassenger(newPassenger)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	return c.JSON(http.StatusOK, "Add passenger was successful")
+
 }
 
 func (u *UserController) GetPassengers(c echo.Context) error {
@@ -208,7 +213,6 @@ func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	// redirectTo := fmt.Sprintf("%s/%s", utils.ENV("URL"), pdfAdr)
 
 	return c.File(pdfAdr)
 }

@@ -69,7 +69,12 @@ func (ur *userGormRepository) GetUserByEmail(email string) (*models.User, error)
 }
 
 func (ur *userGormRepository) CreatePassenger(passenger *models.Passenger) error {
-	return ur.db.Create(passenger).Error
+	var findpassenger models.Passenger
+	err := ur.db.Where("passport_number = ?", passenger.PassportNumber).First(&findpassenger).Error
+	if err != nil {
+		return ur.db.Create(passenger).Error
+	}
+	return fmt.Errorf("Passenger alredy exist")
 }
 
 func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passenger, error) {
