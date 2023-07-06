@@ -23,6 +23,7 @@ type Data struct {
 }
 
 type AuthorityPair struct {
+	ID        uint
 	OrderID   uint
 	Authority string `gorm:"size:255"`
 }

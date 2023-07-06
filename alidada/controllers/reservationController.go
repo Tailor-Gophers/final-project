@@ -1,16 +1,12 @@
 package controllers
 
 import (
-	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -59,8 +55,8 @@ func (rc *ReservationController) Reserve(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusNotAcceptable, err.Error())
 	}
-
-	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), true)
+	sandbox, _ := strconv.ParseBool(utils.ENV("SANDBOX"))
+	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), sandbox)
 	if err != nil {
 		return c.String(500, err.Error())
 	}
@@ -72,63 +68,44 @@ func (rc *ReservationController) Reserve(c echo.Context) error {
 		}
 		log.Fatal(err)
 	}
-	log.Println(authority)  // Save authority in DB
-	log.Println(paymentURL) // Send user to paymentURL
+	err = rc.ReservationService.SetAuthorityPair(authority, order.ID)
+	if err != nil {
+		return err
+	}
 	return c.String(200, paymentURL)
 }
 
 func (rc *ReservationController) Verify(c echo.Context) error {
+	sandbox, _ := strconv.ParseBool(utils.ENV("SANDBOX"))
 
-	authority := c.Param("Authority")
-	status := c.Param("Status")
+	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), sandbox)
+	if err != nil {
+		log.Fatal(err)
+	}
+	authority := c.QueryParam("Authority")
+	order, err := rc.ReservationService.GetOrderByAuthority(authority)
+	if err != nil {
+		return c.String(500, "failed to find order by authority")
+	}
+	amount := int(order.Price)
 
-	switch status {
-	case "OK":
-
-		order, err := rc.ReservationService.GetOrderByAuthority(authority)
-		if err != nil {
-			return errors.New("failed to find order by authority")
+	verified, refID, statusCode, err := zarinPay.PaymentVerification(amount, authority)
+	if err != nil {
+		if statusCode == 101 {
+			return c.String(500, "Payment is already verified")
 		}
+		return c.String(200, "payment cancelled ")
+	}
 
-		verifyRequest := models.VerifyRequest{
-			MerchantID: utils.ENV("MERCHANT_ID"),
-			Amount:     int(order.Price),
-			Authority:  authority,
-		}
+	refIDInt, _ := strconv.ParseInt(refID, 10, 0)
 
-		jsonData, err := json.Marshal(&verifyRequest)
-		if err != nil {
-			return echo.ErrInternalServerError
-		}
+	if verified {
+		err = rc.ReservationService.ConfirmOrder(order.ID, int(refIDInt))
+		return c.String(200, "payment was successful ")
 
-		request, err := http.NewRequest("POST", "https://sandbox.zarinpal.com/pg/v4/payment/verify.json", bytes.NewBuffer(jsonData))
-		request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	} else {
+		return c.String(200, "payment cancelled ")
 
-		client := &http.Client{}
-		response, err := client.Do(request)
-		if err != nil {
-			return echo.ErrInternalServerError
-		}
-		defer response.Body.Close()
-
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return echo.ErrInternalServerError
-		}
-
-		var verifyResponse models.VerifyResponse
-		err = json.Unmarshal(body, &verifyResponse)
-
-		if verifyResponse.Data.Code != 100 {
-			return c.String(http.StatusNotAcceptable, "Payment not confirmed!")
-		}
-
-		err = rc.ReservationService.ConfirmOrder(order.ID, verifyResponse.Data.RefID)
-
-	case "NOK":
-		return c.String(http.StatusNotAcceptable, "Payment not confirmed!")
-	default:
-		return echo.ErrInternalServerError
 	}
 
 	return nil

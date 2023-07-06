@@ -3,8 +3,8 @@ package repository
 import (
 	"alidada/db"
 	"alidada/models"
+
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type ReservationRepository interface {
@@ -37,8 +37,7 @@ func (rr *reservationGormRepository) SetAuthorityPair(authority string, id uint)
 
 func (rr *reservationGormRepository) GetOrderByAuthority(authority string) (*models.Order, error) {
 	var order *models.Order
-	err := rr.db.Preload(clause.Associations).Where("authority = ?", authority).First(order).Error
-
+	err := rr.db.Joins("JOIN authority_pairs ON authority_pairs.order_id = orders.id ").Where("authority_pairs.authority = ?", authority).First(&order).Error
 	return order, err
 }
 
