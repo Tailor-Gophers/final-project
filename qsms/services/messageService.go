@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"os"
 	"qsms/models"
 	"qsms/repository"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-co-op/gocron"
 )
 
 type MessageService interface {
@@ -116,8 +117,11 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 	}
 
 	//todo make a request to mock
-	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
-
+	// fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
+	err = ms.sendSms(user, receiver, text)
+	if err != nil {
+		return err
+	}
 	message := &models.Message{
 		SenderID:       user.ID,
 		ReceiverNumber: receiver,
@@ -130,7 +134,11 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 
 	return nil
 }
+func (ms *messageService) sendSms(user *models.User, receiver string, text string) error {
 
+	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
+	return nil
+}
 func (ms *messageService) SendPeriodicSimpleMessage(user *models.User, receiver string, text string, interval string) error {
 
 	totalCost := SimpleMessageFee + PeriodicMessageFee //having money for at least one message sending
