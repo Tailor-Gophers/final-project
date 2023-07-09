@@ -77,7 +77,11 @@ func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Redu
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.ReserveFlightCapacity(int64(id))
+	count, err := strconv.Atoi(c.Param("count"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+	result, err := f.FlightService.ReserveFlightCapacity(int64(id), int(count))
 	if err != nil {
 		if err.Error() == "flight capacity reached" {
 			return c.String(http.StatusNotFound, "Flight capacity reached!")

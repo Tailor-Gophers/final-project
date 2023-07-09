@@ -18,7 +18,7 @@ type FlightService interface {
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
-	ReserveFlightCapacity(id int64) (*models.FlightClass, error)
+	ReserveFlightCapacity(id int64, count int) (*models.FlightClass, error)
 	ReturnFlightCapacity(id int64) (*models.FlightClass, error)
 	GetFlightByFilter(airline string, aircraft string, departure time.Time) ([]models.FlightClass, error)
 	GetFlightBySort(order string) (*[]models.FlightClass, error)
@@ -49,8 +49,8 @@ func (s *flightService) GetDaysList() ([]string, error) {
 	return s.flightRepository.GetDaysList()
 }
 
-func (s *flightService) ReserveFlightCapacity(id int64) (*models.FlightClass, error) {
-	return s.flightRepository.ReserveFlightCapacity(id)
+func (s *flightService) ReserveFlightCapacity(id int64, count int) (*models.FlightClass, error) {
+	return s.flightRepository.ReserveFlightCapacity(id, count)
 }
 
 func (s *flightService) ReturnFlightCapacity(id int64) (*models.FlightClass, error) {

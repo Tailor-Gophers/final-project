@@ -37,7 +37,7 @@ func routing(e *echo.Echo) {
 	e.GET("/flights/planes", FlightController.GetPlanesList)                       // ok
 	e.GET("/flights/cities", FlightController.GetCitiesList)                       //edit
 	e.GET("/flights/days", FlightController.GetDaysList)                           //edit
-	e.POST("/flights/:id/reserve", FlightController.ReserveFlightCapacity)
+	e.POST("/flights/:id/reserve/:count", FlightController.ReserveFlightCapacity)
 	e.POST("/flights/:id/return", FlightController.ReturnFlightCapacity)
 	e.GET("/flights/filter/:airline/:aircraft/:departure", FlightController.GetFlightByFilter) //edit optional field
 	e.GET("/flights/sort/:order", FlightController.GetFlightBySort)
