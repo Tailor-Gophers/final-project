@@ -21,14 +21,19 @@ type UserRepository interface {
 	UserByToken(token string) (*models.User, error)
 	LogOut(token string) error
 	UpdateBalance(userId uint, amount int) error
-	AddContact(contact *models.Contact) error
-	DeleteContact(user *models.User, contactId uint) error
+	AddContact(user *models.User, contact *models.Contact) error
+	DeleteContact(contactId uint) error
 	GetContact(contactId uint) (*models.Contact, error)
-	UpdateContact(user *models.User, contact *models.Contact) error
+	CreatePhoneBook(user *models.User, phonebook models.PhoneBook) error
+	UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error
+	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
+	DeletePhoneBook(phonebookId uint) error
+	GetNumberByID(numberId uint) (*models.Number, error)
 	GetUserByID(userId uint) (*models.User, error)
 	GetAvailablePhoneNumbers() ([]models.Number, error)
 	SetMainNumber(user *models.User, numberId uint) error
 	CreateTemplate(template *models.Template) error
+	DeleteTemplate(templateId uint) error
 	GetTemplate(templateId uint) (*models.Template, error)
 }
 
@@ -133,15 +138,20 @@ func (ur *userGormRepository) UpdateBalance(userId uint, amount int) error {
 	return ur.db.Model(&models.User{}).Where("id = ?", userId).Update("balance", amount).Error
 }
 
-func (ur *userGormRepository) AddContact(contact *models.Contact) error {
-	return ur.db.Create(contact).Error
+func (ur *userGormRepository) AddContact(user *models.User, contact *models.Contact) error {
+	ur.db.Model(user).Association("Contacts")
+	return ur.db.Model(user).Association("Contacts").Append(contact)
 }
 
 func (ur *userGormRepository) CreateTemplate(template *models.Template) error {
 	return ur.db.Create(template).Error
 }
 
-func (ur *userGormRepository) DeleteContact(user *models.User, contactId uint) error {
+func (ur *userGormRepository) DeleteTemplate(templateId uint) error {
+	return ur.db.Delete(&models.Template{}, templateId).Error
+}
+
+func (ur *userGormRepository) DeleteContact(contactId uint) error {
 	return ur.db.Delete(&models.Contact{}, contactId).Error
 }
 
@@ -154,9 +164,36 @@ func (ur *userGormRepository) GetContact(contactId uint) (*models.Contact, error
 	return &contact, nil
 }
 
-func (ur *userGormRepository) UpdateContact(user *models.User, contact *models.Contact) error {
-	contact.UserID = user.ID
-	return ur.db.Save(contact).Error
+func (ur *userGormRepository) CreatePhoneBook(user *models.User, phonebook models.PhoneBook) error {
+	ur.db.Model(&user).Association("PhoneBooks")
+	if err := ur.db.Model(user).Association("PhoneBooks").Append(&phonebook); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ur *userGormRepository) UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error {
+	ur.db.Model(phonebook).Association("Numbers")
+	return ur.db.Model(phonebook).Association("Numbers").Append(number)
+}
+
+func (ur *userGormRepository) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {
+	var phonebook models.PhoneBook
+	err := ur.db.Model(&models.PhoneBook{}).Preload("Numbers").First(&phonebook, phonebookId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &phonebook, nil
+}
+
+func (ur *userGormRepository) DeletePhoneBook(phonebookId uint) error {
+	return ur.db.Delete(&models.PhoneBook{}, phonebookId).Error
+}
+
+func (ur *userGormRepository) GetNumberByID(numberId uint) (*models.Number, error) {
+	var number models.Number
+	err := ur.db.First(&number, numberId).Error
+	return &number, err
 }
 
 func (ur *userGormRepository) GetUserByID(userId uint) (*models.User, error) {

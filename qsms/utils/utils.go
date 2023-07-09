@@ -53,6 +53,7 @@ func GenerateTokenPair(user *models.User) (string, error) {
 	claims["sub"] = 1
 	claims["name"] = user.UserName
 	claims["admin"] = user.Admin
+	claims["disable"] = user.Disable
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	t, err := token.SignedString([]byte("secret"))

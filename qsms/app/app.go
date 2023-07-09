@@ -32,10 +32,6 @@ func NewApp() *App {
 	paymentService := services.NewPaymentService(paymentRepository)
 	paymentController := controllers.NewPaymentController(userService, paymentService)
 
-	phoneBookRepository := repository.NewGormPhoneBookRepository()
-	phoneBookService := services.NewPhoneBookService(phoneBookRepository)
-	phoneBookController := controllers.PhoneBookController{PhoneBookService: phoneBookService, UserService: userService}
-
 	smsRepository := repository.NewGormMessageRepository()
 	smsService := services.NewMessageService(smsRepository, userRepository)
 	smsController := controllers.NewMessageController(userService, smsService)
@@ -54,26 +50,30 @@ func NewApp() *App {
 	userGroup.GET("/login", userController.Login)
 	userGroup.GET("/me", userController.GetUserByToken)
 	userGroup.GET("/buy", userController.GetPhoneNumbersToBuy)
-	userGroup.POST("/logout", userController.LogOut)
-	userGroup.PUT("/buy/:id", userController.BuyNumber)
-	userGroup.PUT("/rent/:id", userController.PlaceRent)
-	userGroup.DELETE("/dropRent/:id", userController.DropRent)
-	userGroup.POST("/contacts/add", userController.AddContact)
-	userGroup.DELETE("/:id/contacts/:contactID", userController.DeleteContact)
-	userGroup.PUT("/:id/contacts/:contactID", userController.UpdateContact)
-	userGroup.PUT("/main/:id", userController.SetMainNumber)
+	userGroup.GET("/logout", userController.LogOut)
+	userGroup.PUT("/buy/:id", userController.BuyNumber, middlewares.NotSuspended)
+	userGroup.PUT("/rent/:id", userController.PlaceRent, middlewares.NotSuspended)
+	userGroup.DELETE("/dropRent/:id", userController.DropRent, middlewares.NotSuspended)
+	userGroup.PUT("/main/:id", userController.SetMainNumber, middlewares.NotSuspended)
+
+	contactGroup := userGroup.Group("/contact", middlewares.NotSuspended)
+	contactGroup.POST("/add", userController.AddContact)
+	contactGroup.DELETE("/delete/:contactID", userController.DeleteContact)
+
+	phoneBookGroup := userGroup.Group("/phonebook", middlewares.NotSuspended)
+	phoneBookGroup.POST("/create", userController.CreatePhoneBook)
+	phoneBookGroup.PUT("/addNumber/:id/:nid", userController.AddNumberToPhoneBook)
+	phoneBookGroup.DELETE("/delete/:id", userController.DeletePhoneBook)
+
+	templateGroup := userGroup.Group("/template", middlewares.NotSuspended)
+	templateGroup.POST("/create", userController.AddTemplate)
+	templateGroup.DELETE("/delete/:id", userController.DeleteTemplate)
 
 	paymentGroup := e.Group("/sms/payment")
-	paymentGroup.GET("/pay/:amount", paymentController.AddBalance)
-	paymentGroup.GET("/verify/", paymentController.VerifyPayment)
+	paymentGroup.GET("/pay/:amount", paymentController.AddBalance, middlewares.NotSuspended)
+	paymentGroup.GET("/verify", paymentController.VerifyPayment)
 
-	phoneBookGroup := e.Group("/sms/phonebook")
-	phoneBookGroup.POST("", phoneBookController.CreatePhoneBook)
-	phoneBookGroup.GET("/:id", phoneBookController.GetPhoneBookByID)
-	phoneBookGroup.PUT("/:id/:nid", phoneBookController.AddNumberToPhoneBook)
-	phoneBookGroup.DELETE("/:id", phoneBookController.DeletePhoneBook)
-
-	smsGroup := e.Group("/sms/send")
+	smsGroup := e.Group("/sms/send", middlewares.NotSuspended)
 	smsGroup.POST("/single", smsController.SingleMessage)
 	smsGroup.POST("/periodic", smsController.PeriodicMessage)
 

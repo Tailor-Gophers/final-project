@@ -12,8 +12,8 @@ POST http://localhost:3000/sms/user/signup
 Content-Type: application/json
 
 {
-  "email": "pluto@gmail.com",
-  "user_name": "nima",
+  "email": "plutoGay@gmail.com",
+  "user_name": "PluPlu",
   "password": "nima1234"
 }
 
@@ -27,8 +27,17 @@ Content-Type: application/json
 }
 
 ###
+GET http://localhost:3000/sms/user/login
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi8282@gmail.com",
+  "password": "nima1234"
+}
+
+###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjMyMDExLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.9UJlhH-OYK-HE7zY2_DGgAIphwYWaKyU1HpA5L1IC9M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
 ###
 GET http://localhost:3000/sms/user/buy
 
@@ -45,35 +54,34 @@ DELETE http://localhost:3000/sms/user/dropRent/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
 
 ###
-GET http://localhost:3000/sms/payment/pay/1000
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODEwODU2MSwibmFtZSI6Im5pbWEiLCJzdWIiOjF9.hPGr3tQlw3wPDkUNGZH9G6_YP_rrZONaC_cO0Xpc8o4
+GET http://localhost:3000/sms/payment/pay/10000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDI1ODUsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.NMk6Qao3YtV78z9LZGTEmdzpJmceZMGJIsbWnXDjoc0
 
 
 ###
-POST https://sandbox.zarinpal.com/pg/v4/payment/request.json
-accept: application/json
-Content-Type: application/json
-
-{
-  "merchant_id": "7b24c23a-ebb5-11e8-8df1-005056a205be",
-  "amount": 10000,
-  "callback_url": "http://yoursite.com/verify",
-  "description": "افزایش اعتبار کاربر شماره ۱۱۳۴۶۲۹",
-  "metadata": {
-    "mobile": "09121234567",
-    "email": "info.test@gmail.com"
-  }
-}
-
-###
-
 POST http://localhost:3000/sms/user/contacts/add
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODExNjk1OCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.qic1ci-0-XiOFEvc8XhjDinU4EAtYTOQO_d6sI0FLIM
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
 
 {
-  "name": "Nima",
-  "phone": "+6451654845"
+  "name": "nigger",
+  "phone": "+6454214845"
 }
+
+###
+DELETE http://localhost:3000/sms/user/contacts/delete/7
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+
+###
+POST http://localhost:3000/sms/user/template/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+
+{
+  "expression": "nigger nigger nigger"
+}
+
+###
+DELETE http://localhost:3000/sms/user/template/delete/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
 

@@ -7,7 +7,7 @@ import (
 	"qsms/utils"
 )
 
-func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+func NotSuspended(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := utils.GetToken(c)
 
@@ -23,11 +23,10 @@ func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.ErrUnauthorized
 		}
 
-		isAdmin, ok := claims["admin"].(bool)
-		if !ok || !isAdmin {
+		notSuspend, ok := claims["disable"].(bool)
+		if !ok || notSuspend {
 			return echo.ErrForbidden
 		}
-
 		return next(c)
 	}
 }

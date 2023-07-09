@@ -40,6 +40,10 @@ type createContactForm struct {
 	PhoneNumber string `json:"phone"`
 }
 
+type createPhonebookForm struct {
+	Name string `json:"name" form:"name"`
+}
+
 type createTemplateForm struct {
 	Expression string `json:"expression"`
 }
@@ -154,7 +158,6 @@ func (u *UserController) GetPhoneNumbersToBuy(c echo.Context) error {
 }
 
 func (u *UserController) AddContact(c echo.Context) error {
-
 	user, err := u.UserService.UserByToken(utils.GetToken(c))
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "Unauthorized!")
@@ -171,73 +174,133 @@ func (u *UserController) AddContact(c echo.Context) error {
 		PhoneNumber: form.PhoneNumber,
 	}
 
-	err = u.UserService.AddContact(contact)
+	err = u.UserService.AddContact(user, contact)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add contact"})
+		return c.String(http.StatusInternalServerError, "Failed to add contact")
 	}
-
-	return c.JSON(http.StatusCreated, map[string]string{"message": "Contact added successfully"})
+	return c.String(http.StatusCreated, "Contact added successfully")
 }
 
 func (u *UserController) DeleteContact(c echo.Context) error {
-	userID, err := strconv.Atoi(c.Param("id"))
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
 	contactID, err := strconv.Atoi(c.Param("contactID"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
+		return c.String(http.StatusBadRequest, "Invalid contact ID!")
 	}
 
-	user, err := u.UserService.GetUserByID(uint(userID))
+	contactExists := false
+	for _, contact := range user.Contacts {
+		if contact.ID == uint(contactID) {
+			contactExists = true
+		}
+	}
+	if !contactExists {
+		return c.String(http.StatusBadRequest, "User has no contact with this id!")
+	}
+
+	err = u.UserService.DeleteContact(uint(contactID))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		return c.String(http.StatusInternalServerError, "Failed to delete contact: "+err.Error())
 	}
-
-	err = u.UserService.DeleteContact(user, uint(contactID))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete contact"})
-	}
-
-	return c.JSON(http.StatusOK, map[string]string{"message": "Contact deleted successfully"})
+	return c.String(http.StatusOK, "Contact deleted successfully")
 }
 
-func (u *UserController) UpdateContact(c echo.Context) error {
-	userID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
-	}
-
-	contactID, err := strconv.Atoi(c.Param("contactID"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid ID")
-	}
-
-	user, err := u.UserService.GetUserByID(uint(userID))
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
-	}
-
-	contact, err := u.UserService.GetContact(uint(contactID))
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Contact not found"})
-	}
-
-	form := new(createContactForm)
+func (u *UserController) CreatePhoneBook(c echo.Context) error {
+	form := new(createPhonebookForm)
 	if err := c.Bind(form); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+		return c.String(http.StatusBadRequest, "Invalid request body!")
 	}
 
-	contact.Name = form.Name
-	contact.PhoneNumber = form.PhoneNumber
-
-	err = u.UserService.UpdateContact(user, contact)
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update contact"})
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Contact updated successfully"})
+	phoneBook := models.PhoneBook{
+		UserID: user.ID,
+		Name:   form.Name,
+	}
+
+	err = u.UserService.CreatePhoneBook(user, phoneBook)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to create phone book: "+err.Error())
+	}
+	return c.String(http.StatusCreated, "Phone book created successfully")
+}
+
+func (u *UserController) AddNumberToPhoneBook(c echo.Context) error {
+
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	phonebookID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid PhoneBook ID")
+	}
+	numberID, err := strconv.Atoi(c.Param("nid"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid Number ID")
+	}
+
+	idExists := false
+	for _, book := range user.PhoneBooks {
+		if int(book.ID) == phonebookID {
+			idExists = true
+			break
+		}
+	}
+	if !idExists {
+		return c.String(http.StatusBadRequest, "User has no phonebook with this id!")
+	}
+
+	phonebook, err := u.UserService.GetPhoneBook(uint(phonebookID))
+	if err != nil {
+		return err
+	}
+
+	number, err := u.UserService.GetNumberByID(uint(numberID))
+	if err != nil {
+		return err
+	}
+
+	if err = u.UserService.UpdatePhoneBook(phonebook, number); err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to update phonebook: "+err.Error())
+	}
+	return c.String(http.StatusOK, "Number added successfully!")
+}
+
+func (u *UserController) DeletePhoneBook(c echo.Context) error {
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	phonebookID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid phonebook ID")
+	}
+
+	phonebookExists := false
+	for _, phoneBook := range user.PhoneBooks {
+		if phoneBook.ID == uint(phonebookID) {
+			phonebookExists = true
+		}
+	}
+	if !phonebookExists {
+		return c.String(http.StatusNotAcceptable, "User has no phonebook with this id!")
+	}
+
+	err = u.UserService.DeletePhoneBook(uint(phonebookID))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to delete phonebook: "+err.Error())
+	}
+	return c.String(http.StatusOK, "Phonebook deleted successfully")
 }
 
 func (u *UserController) AddTemplate(c echo.Context) error {
@@ -262,6 +325,34 @@ func (u *UserController) AddTemplate(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.String(http.StatusCreated, "Template created successfully!")
+}
+
+func (u *UserController) DeleteTemplate(c echo.Context) error {
+	user, err := u.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
+
+	templateID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid template ID")
+	}
+
+	templateExists := false
+	for _, template := range user.Templates {
+		if template.ID == uint(templateID) {
+			templateExists = true
+		}
+	}
+	if !templateExists {
+		return c.String(http.StatusNotAcceptable, "User has no template with this id!")
+	}
+
+	err = u.UserService.DeleteTemplate(uint(templateID))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to delete template: "+err.Error())
+	}
+	return c.String(http.StatusOK, "Template deleted successfully")
 }
 
 func (u *UserController) SetMainNumber(c echo.Context) error {

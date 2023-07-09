@@ -23,8 +23,7 @@ func NewPaymentController(userService services.UserService, paymentService servi
 }
 
 const (
-	CallBackURL     = "http://localhost:3000/sms/payment/verify"
-	PaymentRedirect = "https://sandbox.zarinpal.com/pg/StartPay/"
+	CallBackURL = "http://localhost:3000/sms/payment/verify"
 )
 
 func (pc *PaymentController) AddBalance(c echo.Context) error {
@@ -39,12 +38,21 @@ func (pc *PaymentController) AddBalance(c echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	code, authority, err := utils.RequestNewPayment(amount, CallBackURL)
+	sandbox, _ := strconv.ParseBool(utils.ENV("SANDBOX"))
+	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), sandbox)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
 
-	fmt.Println(code)
-	fmt.Println(err.Error())
+	paymentURL, authority, statusCode, err := zarinPay.NewPaymentRequest(amount, CallBackURL, "User balance charge.", user.Email, "")
 
-	if code != 100 {
+	if err != nil {
+		if statusCode == -3 {
+			return c.String(500, "Amount is not accepted in banking system")
+		}
+	}
+
+	if statusCode != 100 {
 		return c.String(http.StatusInternalServerError, "Failed to request payment gateway.")
 	}
 
@@ -60,11 +68,14 @@ func (pc *PaymentController) AddBalance(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Failed to create transaction!")
 	}
 
-	err = c.Redirect(http.StatusOK, PaymentRedirect+authority)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to redirect to payment!")
-	}
-	return c.String(http.StatusOK, "Redirected to payment page.")
+	fmt.Println(paymentURL)
+
+	//err = c.Redirect(http.StatusFound, paymentURL)
+	//if err != nil {
+	//	return c.String(http.StatusInternalServerError, "Failed to redirect to payment!")
+	//}
+
+	return c.String(http.StatusOK, paymentURL)
 }
 
 func (pc *PaymentController) VerifyPayment(c echo.Context) error {
@@ -81,28 +92,41 @@ func (pc *PaymentController) VerifyPayment(c echo.Context) error {
 		return c.String(http.StatusNotAcceptable, "Failed to retrieve transaction!")
 	}
 
-	code, refId, err := utils.VerifyPayment(transaction.Amount, transaction.Authority)
-
+	sandbox, _ := strconv.ParseBool(utils.ENV("SANDBOX"))
+	zarinPay, err := utils.NewZarinpal(utils.ENV("MERCHANT_ID"), sandbox)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusInternalServerError, "Failed to initialize payment gateway: "+err.Error())
 	}
 
-	if code != 100 {
-		return c.String(http.StatusNotAcceptable, "Payment not confirmed!")
+	verified, refID, statusCode, err := zarinPay.PaymentVerification(transaction.Amount, authority)
+	if err != nil {
+		if statusCode == 101 {
+			return c.String(500, "Payment is already verified")
+		}
+		return c.String(http.StatusNotAcceptable, "Payment was failed ")
 	}
 
-	err = pc.PaymentService.ConfirmTransaction(&transaction, refId)
+	refIDint, err := strconv.Atoi(refID)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to confirm payment!")
+		return err
 	}
 
-	err = pc.UserService.AddBalance(transaction.UserID, transaction.Amount)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to add balance!")
+	if verified {
+		err = pc.PaymentService.ConfirmTransaction(&transaction, refIDint)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Failed to confirm payment!")
+		}
+
+		err = pc.UserService.AddBalance(transaction.UserID, transaction.Amount)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Failed to add balance!")
+		}
+	} else {
+		return c.String(http.StatusOK, "Payment cancelled ")
 	}
 
 	return c.JSON(http.StatusAccepted, map[string]string{
-		"ref_id":  strconv.Itoa(refId),
+		"ref_id":  refID,
 		"amount":  strconv.Itoa(transaction.Amount),
 		"user_id": strconv.Itoa(int(transaction.UserID)),
 	})
