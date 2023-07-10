@@ -2,7 +2,7 @@ package models
 
 type Number struct {
 	Model
-	UserID      uint         `gorm:"not null"`
+	UserID      *uint        `json:"user_id"`
 	PhoneNumber string       `gorm:"size:255;not null" json:"phone_number"`
 	Price       int          `json:"price"`
 	Active      bool         `json:"active"`

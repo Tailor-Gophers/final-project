@@ -261,12 +261,12 @@ func (u *UserController) AddNumberToPhoneBook(c echo.Context) error {
 
 	phonebook, err := u.UserService.GetPhoneBook(uint(phonebookID))
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, "Failed to retrieve phonebook with this id: "+err.Error())
 	}
 
 	number, err := u.UserService.GetNumberByID(uint(numberID))
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, "Failed to retrieve number with this id: "+err.Error())
 	}
 
 	if err = u.UserService.UpdatePhoneBook(phonebook, number); err != nil {
@@ -385,7 +385,7 @@ func (u *UserController) SetMainNumber(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	return nil
+	return c.String(http.StatusOK, "Successfully updated user main number.")
 }
 
 func (u *UserController) BuyNumber(c echo.Context) error {
@@ -403,7 +403,7 @@ func (u *UserController) BuyNumber(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	return nil
+	return c.String(http.StatusOK, "Successfully purchased number.")
 }
 
 func (u *UserController) PlaceRent(c echo.Context) error {
@@ -419,10 +419,9 @@ func (u *UserController) PlaceRent(c echo.Context) error {
 
 	err = u.PurchaseService.PlaceRent(user, uint(numberId))
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to place rent.")
+		return c.String(http.StatusInternalServerError, "Failed to place rent: "+err.Error())
 	}
-
-	return nil
+	return c.String(http.StatusOK, "Successfully placed rent.")
 }
 
 func (u *UserController) DropRent(c echo.Context) error {
@@ -438,10 +437,9 @@ func (u *UserController) DropRent(c echo.Context) error {
 
 	err = u.PurchaseService.DropRent(user, uint(rentId))
 	if err != nil {
-		return c.String(http.StatusNotAcceptable, err.Error())
+		return c.String(http.StatusNotAcceptable, "Failed to drop rent: "+err.Error())
 	}
-
-	return nil
+	return c.String(http.StatusOK, "Successfully dropped rent.")
 }
 
 func validatePassword(password string) bool {

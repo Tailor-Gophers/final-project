@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"qsms/models"
 	"qsms/repository"
@@ -47,13 +48,7 @@ func NewMessageService(messageRepository repository.MessageRepository,
 		fmt.Println("Error while converting bad_words.json: ", err)
 	}
 
-	escapedWords := make([]string, len(badWords.Words))
-	for i, word := range badWords.Words {
-		escapedWords[i] = regexp.QuoteMeta(word)
-	}
-	patternFromWords := "(" + regexp.QuoteMeta(escapedWords[0]) + ")" + "\\b" + fmt.Sprintf("|(%s)\\b", escapedWords[1:])
-	pattern := "\\b(" + patternFromWords + ")\\b"
-
+	pattern := "\\b(" + strings.Join(badWords.Words, "|") + ")\\b"
 	regex = regexp.MustCompile(pattern)
 
 	return &messageService{
@@ -82,9 +77,12 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 	if CheckBadWords(text) {
 		return errors.New("can't send message: contains bad words")
 	}
+	if strings.TrimSpace(text) == "" {
+		return errors.New("message can't be empty")
+	}
 
 	//todo make a request to mock
-	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
+	log.Printf("Message from %s(%d) -> %s :: %s \n", user.UserName, user.MainNumberID, receiver, text)
 
 	message := &models.Message{
 		SenderID:       user.ID,
@@ -95,7 +93,6 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 	if err != nil {
 		return errors.New("failed to save message: " + err.Error())
 	}
-
 	return nil
 }
 
@@ -117,11 +114,8 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 	}
 
 	//todo make a request to mock
-	// fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
-	err = ms.sendSms(user, receiver, text)
-	if err != nil {
-		return err
-	}
+	log.Printf("Message from %s(%d) -> %s :: %s \n", user.UserName, user.MainNumberID, receiver, text)
+
 	message := &models.Message{
 		SenderID:       user.ID,
 		ReceiverNumber: receiver,
@@ -131,14 +125,9 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 	if err != nil {
 		return errors.New("failed to save message: " + err.Error())
 	}
-
 	return nil
 }
-func (ms *messageService) sendSms(user *models.User, receiver string, text string) error {
 
-	fmt.Printf("Message from %s(%d) -> %s :: %s", user.UserName, user.MainNumberID, receiver, text)
-	return nil
-}
 func (ms *messageService) SendPeriodicSimpleMessage(user *models.User, receiver string, text string, interval string) error {
 
 	totalCost := SimpleMessageFee + PeriodicMessageFee //having money for at least one message sending

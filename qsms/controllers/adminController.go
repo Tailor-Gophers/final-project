@@ -32,7 +32,6 @@ func (ac *AdminController) AddNumber(c echo.Context) error {
 	}
 
 	number := &models.Number{
-		UserID:      0,
 		PhoneNumber: body.PhoneNumber,
 		Price:       body.Price,
 		Active:      false,

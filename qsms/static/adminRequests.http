@@ -10,11 +10,11 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/sms/admin/addNumber
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTAwMzI3NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.PyGPOorjgC4WVX3I3KHJ63ux0AB6EbcPPJJ6MtYmLpk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
 
 {
-  "phone_number": "+989144154692",
-  "price": 250
+  "phone_number": "+6515915152",
+  "price": 100
 }
 
 ###

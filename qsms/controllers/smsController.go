@@ -23,7 +23,6 @@ func NewMessageController(UserService services.UserService, MessageService servi
 }
 
 type simpleRequestForm struct {
-	//Only one of these fields must be provided!
 	Numbers      []string `json:"numbers"`
 	ContactIDs   []int    `json:"contact_ids"`
 	PhonebookIDs []int    `json:"phonebook_ids"`

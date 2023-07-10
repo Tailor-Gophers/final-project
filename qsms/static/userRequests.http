@@ -37,17 +37,22 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/sms/user/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
+
 ###
 GET http://localhost:3000/sms/user/buy
 
 ###
 PUT http://localhost:3000/sms/user/buy/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
 
 ###
-PUT http://localhost:3000/sms/user/rent/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODQ4NDE4NCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Jj1EnRMh0Bt72qurB4EEJVgZ8fLuuQW9FIWR6lhLiWA
+PUT http://localhost:3000/sms/user/main/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
+
+###
+PUT http://localhost:3000/sms/user/rent/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
 
 ###
 DELETE http://localhost:3000/sms/user/dropRent/1
@@ -59,9 +64,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsI
 
 
 ###
-POST http://localhost:3000/sms/user/contacts/add
+POST http://localhost:3000/sms/user/contact/add
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
 
 {
   "name": "nigger",
@@ -75,13 +80,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsI
 ###
 POST http://localhost:3000/sms/user/template/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
 
 {
-  "expression": "nigger nigger nigger"
+  "expression": "Hi im {{user_name}} and today is {{date}}"
 }
 
 ###
 DELETE http://localhost:3000/sms/user/template/delete/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+
+
+
 

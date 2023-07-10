@@ -1,8 +1,8 @@
 package models
 
 type Message struct {
-	Model
+	ID             uint   `gorm:"primaryKey"`
 	SenderID       uint   `gorm:"not null" json:"sender_id"`
-	ReceiverNumber string `gorm:"size:12" json:"receiver_number"`
+	ReceiverNumber string `gorm:"size:15" json:"receiver_number"`
 	Message        string
 }

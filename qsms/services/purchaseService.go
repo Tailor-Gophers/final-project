@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/go-co-op/gocron"
+	"log"
 	"qsms/models"
 	"qsms/repository"
 	"time"
@@ -27,7 +27,7 @@ func NewPurchaseService(repository repository.PurchaseRepository) PurchaseServic
 	}
 }
 
-var RentingRate = 0.1
+const RentingRate = 0.1
 
 func (ps *purchaseService) BuyNumber(user *models.User, numberId uint) error {
 	number, err := ps.purchaseRepository.GetNumberByID(numberId)
@@ -53,24 +53,6 @@ func (ps *purchaseService) BuyNumber(user *models.User, numberId uint) error {
 		return err
 	}
 
-	return nil
-}
-
-func (ps *purchaseService) RegisterRentingTasks() error {
-	rents, err := ps.purchaseRepository.GetAllRents()
-	if err != nil {
-		return err
-	}
-
-	s := gocron.NewScheduler(time.UTC)
-	for _, rent := range rents {
-		_, err = s.Every(30).Days().
-			StartAt(rent.LastPaid.Add(30*24*time.Hour)).Do(ps.UpdateRent, rent.UserID, rent.NumberID)
-		if err != nil {
-			return err
-		}
-	}
-	s.StartAsync()
 	return nil
 }
 
@@ -112,14 +94,8 @@ func (ps *purchaseService) PlaceRent(user *models.User, numberId uint) error {
 		return err
 	}
 
-	s := gocron.NewScheduler(time.UTC)
-	scheduleTime := time.Now().Add(30 * 24 * time.Hour)
-	_, err = s.Every(30).Days().StartAt(scheduleTime).Do(ps.UpdateRent, user.ID, number.ID)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	s.StartAsync()
+	ps.ScheduleRentingTask(24*30*time.Hour, user.ID, number.ID)
+
 	return nil
 }
 
@@ -139,7 +115,7 @@ func (ps *purchaseService) UpdateRent(userId, numberId uint) error {
 	if user.Balance < rent.Price {
 		err = ps.DropRent(user, rent.ID)
 		if err != nil {
-			return err
+			log.Println("Error while dropping rent in scheduler!")
 		}
 		return errors.New(fmt.Sprintf("Low balance: you need at least %d to rent number %d", rent.Price, numberId))
 	}
@@ -150,16 +126,11 @@ func (ps *purchaseService) UpdateRent(userId, numberId uint) error {
 	}
 	err = ps.purchaseRepository.UpdateRentDate(rent.ID, time.Now())
 	if err != nil {
+		fmt.Println(2)
 		return err
 	}
 
-	s := gocron.NewScheduler(time.UTC)
-	scheduleTime := time.Now().Add(30 * 24 * time.Hour)
-	_, err = s.Every(30).Days().StartAt(scheduleTime).Do(ps.UpdateRent, user.ID, numberId)
-	if err != nil {
-		return err
-	}
-	s.StartAsync()
+	ps.ScheduleRentingTask(24*30*time.Hour, user.ID, numberId)
 
 	return nil
 }
@@ -195,4 +166,27 @@ func (ps *purchaseService) DropRent(user *models.User, rentId uint) error {
 		return err
 	}
 	return nil
+}
+
+func (ps *purchaseService) RegisterRentingTasks() error {
+	rents, err := ps.purchaseRepository.GetAllRents()
+	if err != nil {
+		return err
+	}
+
+	for _, rent := range rents {
+		delay := rent.LastPaid.Add(24 * 30 * time.Hour).Sub(time.Now())
+		ps.ScheduleRentingTask(delay, rent.UserID, rent.NumberID)
+	}
+	return nil
+}
+
+func (ps *purchaseService) ScheduleRentingTask(delay time.Duration, userId uint, numberId uint) {
+	go func() {
+		time.Sleep(delay)
+		err := ps.UpdateRent(userId, numberId)
+		if err != nil {
+			log.Printf("Failed to update rent for user %d and number %d: "+err.Error(), userId, numberId)
+		}
+	}()
 }

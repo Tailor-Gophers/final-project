@@ -4,6 +4,7 @@ import (
 	"qsms/models"
 	"qsms/repository"
 	"regexp"
+	"strings"
 )
 
 type AdminService interface {
@@ -47,11 +48,7 @@ func (as *adminService) SearchMessages(words []string) ([]models.Message, error)
 		return nil, err
 	}
 
-	pattern := "\\b(" + regexp.QuoteMeta(words[0])
-	for _, word := range words[1:] {
-		pattern += "|" + regexp.QuoteMeta(word)
-	}
-	pattern += ")\\b"
+	pattern := "\\b(" + strings.Join(words, "|") + ")\\b"
 	regex := regexp.MustCompile(pattern)
 
 	result := make([]models.Message, 0)
@@ -61,7 +58,7 @@ func (as *adminService) SearchMessages(words []string) ([]models.Message, error)
 			result = append(result, AdminViewMessage(message))
 		}
 	}
-	return messages, nil
+	return result, nil
 }
 
 func (as *adminService) GetMessageByID(messageId uint) (models.Message, error) {
@@ -75,7 +72,7 @@ func (as *adminService) GetMessageByID(messageId uint) (models.Message, error) {
 func AdminViewMessage(message models.Message) models.Message {
 	pattern := `\b\d{5,7}\b`
 	regex := regexp.MustCompile(pattern)
-	maskedInput := regex.ReplaceAllString(message.Message, "******")
+	maskedInput := regex.ReplaceAllString(message.Message, "______")
 
 	message.Message = maskedInput
 

@@ -79,9 +79,9 @@ func (pr *purchaseGormRepository) GetRentByIDs(userId, numberId uint) (models.Re
 }
 
 func (pr *purchaseGormRepository) GetUserById(userId uint) (*models.User, error) {
-	var user *models.User
-	err := pr.db.First(user, userId).Error
-	return user, err
+	var user models.User
+	err := pr.db.First(&user, userId).Error
+	return &user, err
 }
 
 func (pr *purchaseGormRepository) UpdateRentDate(rentId uint, time time.Time) error {
