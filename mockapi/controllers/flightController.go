@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"mockapi/models"
 	"mockapi/services"
 	"net/http"
 	"strconv"
@@ -55,21 +56,33 @@ func (f *FlightController) GetPlanesList(c echo.Context) error {
 }
 
 func (f *FlightController) GetCitiesList(c echo.Context) error {
-	result, err := f.FlightService.GetCitiesList()
+	origin, destination, err := f.FlightService.GetCitiesList()
 	if err != nil {
 		return c.String(http.StatusNotFound, "No City Found!!")
-
 	}
-	return c.JSON(http.StatusOK, result)
+
+	cities := map[string]interface{}{
+		"Origin":      origin,
+		"Destination": destination,
+	}
+
+	return c.JSON(http.StatusOK, cities)
 }
 
 func (f *FlightController) GetDaysList(c echo.Context) error {
 	result, err := f.FlightService.GetDaysList()
 	if err != nil {
 		return c.String(http.StatusNotFound, "No Day Found!!")
-
 	}
-	return c.JSON(http.StatusOK, result)
+
+	responseData := map[string][]models.Flight{}
+
+	for _, flight := range result {
+		day := flight.StartTime.Format("2006-01-02")
+		responseData[day] = append(responseData[day], flight)
+	}
+
+	return c.JSON(http.StatusOK, responseData)
 }
 
 func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Reduce Capacity
@@ -107,16 +120,22 @@ func (f *FlightController) ReturnFlightCapacity(c echo.Context) error { // Incre
 }
 
 func (f *FlightController) GetFlightByFilter(c echo.Context) error {
-	airline := c.Param("airline")
-	aircraft := c.Param("aircraft")
-	departureStr := c.Param("departure")
+	airline := c.QueryParam("airline")
+	aircraft := c.QueryParam("aircraft")
+	departureStr := c.QueryParam("departure")
+
+	capacityInt, err := strconv.Atoi(c.QueryParam("capacity"))
+	if err != nil && c.QueryParam("capacity") != "" {
+		return c.String(http.StatusBadRequest, "Invalid capacity")
+	}
+	capacity := uint(capacityInt)
 
 	departure, err := time.Parse("2006-01-02", departureStr)
-	if err != nil {
+	if err != nil && c.QueryParam("departure") != "" {
 		return c.String(http.StatusBadRequest, "Invalid date format")
 	}
 
-	result, err := f.FlightService.GetFlightByFilter(airline, aircraft, departure)
+	result, err := f.FlightService.GetFlightByFilter(airline, aircraft, departure, capacity)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
 	}
@@ -125,8 +144,9 @@ func (f *FlightController) GetFlightByFilter(c echo.Context) error {
 }
 
 func (f *FlightController) GetFlightBySort(c echo.Context) error {
-	order := c.Param("order")
-	result, err := f.FlightService.GetFlightBySort(order)
+	orderBy := c.Param("orderBy")
+	order := c.QueryParam("order")
+	result, err := f.FlightService.GetFlightBySort(orderBy, order)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
 	}

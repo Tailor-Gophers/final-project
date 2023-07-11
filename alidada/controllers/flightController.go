@@ -41,9 +41,10 @@ func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 }
 
 func (f *FlightController) SearchFlightsSort(c echo.Context) error {
+	orderBy := c.Param("orderBy")
 	order := c.QueryParam("order")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s", order)
+	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s?order=%s", orderBy, order)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -63,12 +64,13 @@ func (f *FlightController) SearchFlightsSort(c echo.Context) error {
 	return c.JSON(http.StatusOK, flightclass)
 }
 
-func (f *FlightController) FiletrFlights(c echo.Context) error {
+func (f *FlightController) FilterFlights(c echo.Context) error {
 	airline := c.QueryParam("airline")
 	aircraft := c.QueryParam("aircraft")
 	departure := c.QueryParam("departure")
+	capacity := c.QueryParam("capacity")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/filter/%s/%s/%s", airline, aircraft, departure)
+	url := fmt.Sprintf("http://localhost:3001/flights/filter?airline=%s&aircraft=%s&departure=%s&capacity=%s", airline, aircraft, departure, capacity)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{

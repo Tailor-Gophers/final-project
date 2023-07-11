@@ -48,8 +48,8 @@ func alidadaRouting(e *echo.Echo) {
 	reservationGroup.GET("/verify", reservationController.Verify) //http://www.yoursite.ir/?Authority=A00000000000000000000000000202690354&Status=OK ????
 
 	e.GET("/flights/search", flightController.SearchFlightsDay)
-	e.GET("/flights/sort", flightController.SearchFlightsSort)
-	e.GET("/flights/filter", flightController.FiletrFlights)
+	e.GET("/flights/sort/:orderBy", flightController.SearchFlightsSort)
+	e.GET("/flights/filter", flightController.FilterFlights)
 }
 
 func qsmsRouting(e *echo.Echo) {
