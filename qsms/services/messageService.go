@@ -1,10 +1,13 @@
 package services
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"qsms/models"
 	"qsms/repository"
@@ -57,7 +60,6 @@ func NewMessageService(messageRepository repository.MessageRepository,
 	}
 }
 
-// todo: make this configurable
 const (
 	SimpleMessageFee   = 10 //charge for basic message sending
 	PeriodicMessageFee = 5  //charge for setting a scheduler
@@ -81,9 +83,11 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 		return errors.New("message can't be empty")
 	}
 
-	//todo make a request to mock
 	log.Printf("Message from %s(%d) -> %s :: %s \n", user.UserName, user.MainNumberID, receiver, text)
-	err = ms.sendsms(receiver, text)
+	err = ms.sendSms(receiver, text)
+	if err != nil {
+		return errors.New("failed to send sms: " + err.Error())
+	}
 
 	message := &models.Message{
 		SenderID:       user.ID,
@@ -96,25 +100,6 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 	}
 	return nil
 }
-func (ms *messageService) sendsms(receiver string, text string) error{
-	postBody, _ := json.Marshal(map[string]string{
-		      "receiver":  receiver,
-		      "text": text,
-	})
-	responseBody := bytes.NewBuffer(postBody)
-	resp, err := http.Post("localhost:8080/send_sms", "application/json", responseBody)
-	if err != nil {
-	      log.Fatalf("An Error Occured %v", err)
-	   }
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		      log.Fatalln(err)
-		   }
-	sb := string(body)
-	log.Printf(sb)
-	return err
-		}
 
 func (ms *messageService) SendTemplateMessage(user *models.User, receiver string, template string) error {
 
@@ -133,8 +118,11 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 		return errors.New("can't send message: contains bad words")
 	}
 
-	//todo make a request to mock
 	log.Printf("Message from %s(%d) -> %s :: %s \n", user.UserName, user.MainNumberID, receiver, text)
+	err = ms.sendSms(receiver, text)
+	if err != nil {
+		return errors.New("failed to send sms: " + err.Error())
+	}
 
 	message := &models.Message{
 		SenderID:       user.ID,
@@ -172,7 +160,7 @@ func (ms *messageService) SendPeriodicSimpleMessage(user *models.User, receiver 
 	}
 
 	s := ScheduleWithParser(interval)
-	_, err = s.Do(ms.SendSimpleMessage(user, receiver, text))
+	_, err = s.Do(ms.SendSimpleMessage, user, receiver, text)
 	if err != nil {
 		return errors.New("failed to schedule task: " + err.Error())
 	}
@@ -203,7 +191,7 @@ func (ms *messageService) SendPeriodicTemplateMessage(user *models.User, receive
 	}
 
 	s := ScheduleWithParser(interval)
-	_, err = s.Do(ms.SendTemplateMessage(user, receiver, template))
+	_, err = s.Do(ms.SendTemplateMessage, user, receiver, template)
 	if err != nil {
 		return err
 	}
@@ -224,12 +212,12 @@ func (ms *messageService) RegisterMessagingSchedules() error {
 			return errors.New("user not found: " + err.Error())
 		}
 		if schedule.Text != "" { //is simple
-			_, err = s.Do(ms.SendSimpleMessage(user, schedule.Receiver, schedule.Text))
+			_, err = s.Do(ms.SendSimpleMessage, user, schedule.Receiver, schedule.Text)
 			if err != nil {
 				return errors.New("failed to schedule task: " + err.Error())
 			}
 		} else if schedule.Template != "" {
-			_, err = s.Do(ms.SendTemplateMessage(user, schedule.Receiver, schedule.Template))
+			_, err = s.Do(ms.SendTemplateMessage, user, schedule.Receiver, schedule.Template)
 			if err != nil {
 				return errors.New("failed to schedule task: " + err.Error())
 			}
@@ -256,6 +244,8 @@ func GenerateTextFromTemplate(user *models.User, template string) string {
 func ScheduleWithParser(interval string) *gocron.Scheduler {
 	s := gocron.NewScheduler(time.UTC)
 	switch string(interval[len(interval)-1]) {
+	case "s":
+		return s.Every(interval)
 	case "m":
 		return s.Every(interval)
 	case "h":
@@ -275,4 +265,36 @@ func CheckBadWords(text string) bool {
 		return true
 	}
 	return false
+}
+
+type MockResponse struct {
+	StatusCode   int    `json:"status_code"`
+	ErrorMessage string `json:"error_message"`
+}
+
+func (ms *messageService) sendSms(receiver string, text string) error {
+	postBody, _ := json.Marshal(map[string]string{
+		"receiver": receiver,
+		"message":  text,
+	})
+	resp, err := http.Post("http://localhost:3002/send", "application/json", bytes.NewBuffer(postBody))
+	if err != nil {
+		return errors.New("failed to send request: " + err.Error())
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var response MockResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != 200 {
+		return errors.New("error from mock: " + response.ErrorMessage)
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"qsms/models"
@@ -137,7 +138,7 @@ func (sms *MessageController) PeriodicMessage(c echo.Context) error {
 		return c.String(http.StatusNotAcceptable, "User has no main number set!")
 	}
 
-	pattern := `^(?:[1-9]|[1-9][0-9]|100)[mhdM]$`
+	pattern := `^(?:[1-9]|[1-9][0-9]|100)[smhdM]$`
 	regex := regexp.MustCompile(pattern)
 	if !regex.MatchString(body.Interval) {
 		return c.String(http.StatusBadRequest, "Invalid interval form.")
@@ -194,7 +195,7 @@ func (sms *MessageController) PeriodicMessage(c echo.Context) error {
 			if err != nil {
 				return c.String(http.StatusBadRequest, err.Error())
 			}
-			err = sms.MessageService.SendPeriodicSimpleMessage(user, contact.PhoneNumber, template.Expression, body.Interval)
+			err = sms.MessageService.SendPeriodicTemplateMessage(user, contact.PhoneNumber, template.Expression, body.Interval)
 			if err != nil {
 				return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
 			}
@@ -211,8 +212,10 @@ func (sms *MessageController) PeriodicMessage(c echo.Context) error {
 				}
 			}
 		}
+	} else {
+		return c.String(http.StatusBadRequest, "You must at least provide one of text or template fields!")
 	}
-	return nil
+	return c.String(http.StatusOK, fmt.Sprintf("Successfully set message sending every %s.", body.Interval))
 }
 
 func getUserContact(user *models.User, contactId uint) (models.Contact, error) {
