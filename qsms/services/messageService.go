@@ -83,6 +83,7 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 
 	//todo make a request to mock
 	log.Printf("Message from %s(%d) -> %s :: %s \n", user.UserName, user.MainNumberID, receiver, text)
+	err = ms.sendsms(receiver, text)
 
 	message := &models.Message{
 		SenderID:       user.ID,
@@ -95,6 +96,25 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 	}
 	return nil
 }
+func (ms *messageService) sendsms(receiver string, text string) error{
+	postBody, _ := json.Marshal(map[string]string{
+		      "receiver":  receiver,
+		      "text": text,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	resp, err := http.Post("localhost:8080/send_sms", "application/json", responseBody)
+	if err != nil {
+	      log.Fatalf("An Error Occured %v", err)
+	   }
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		      log.Fatalln(err)
+		   }
+	sb := string(body)
+	log.Printf(sb)
+	return err
+		}
 
 func (ms *messageService) SendTemplateMessage(user *models.User, receiver string, template string) error {
 
