@@ -243,10 +243,8 @@ func (u *UserController) AddNumberToPhoneBook(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid PhoneBook ID")
 	}
-	numberID, err := strconv.Atoi(c.Param("nid"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid Number ID")
-	}
+
+	number := c.Param("num")
 
 	idExists := false
 	for _, book := range user.PhoneBooks {
@@ -262,11 +260,6 @@ func (u *UserController) AddNumberToPhoneBook(c echo.Context) error {
 	phonebook, err := u.UserService.GetPhoneBook(uint(phonebookID))
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve phonebook with this id: "+err.Error())
-	}
-
-	number, err := u.UserService.GetNumberByID(uint(numberID))
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to retrieve number with this id: "+err.Error())
 	}
 
 	if err = u.UserService.UpdatePhoneBook(phonebook, number); err != nil {

@@ -76,7 +76,7 @@ func (sms *MessageController) SingleMessage(c echo.Context) error {
 				return c.String(http.StatusBadRequest, err.Error())
 			}
 			for _, number := range phoneBook.Numbers {
-				err = sms.MessageService.SendSimpleMessage(user, number.PhoneNumber, body.Text)
+				err = sms.MessageService.SendSimpleMessage(user, number.Number, body.Text)
 				if err != nil {
 					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
 				}
@@ -115,7 +115,7 @@ func (sms *MessageController) SingleMessage(c echo.Context) error {
 				return c.String(http.StatusBadRequest, err.Error())
 			}
 			for _, number := range phoneBook.Numbers {
-				err = sms.MessageService.SendTemplateMessage(user, number.PhoneNumber, template.Expression)
+				err = sms.MessageService.SendTemplateMessage(user, number.Number, template.Expression)
 				if err != nil {
 					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
 				}
@@ -167,7 +167,7 @@ func (sms *MessageController) PeriodicMessage(c echo.Context) error {
 				return c.String(http.StatusBadRequest, err.Error())
 			}
 			for _, number := range phoneBook.Numbers {
-				err = sms.MessageService.SendPeriodicSimpleMessage(user, number.PhoneNumber, body.Text, body.Interval)
+				err = sms.MessageService.SendPeriodicSimpleMessage(user, number.Number, body.Text, body.Interval)
 				if err != nil {
 					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
 				}
@@ -206,7 +206,7 @@ func (sms *MessageController) PeriodicMessage(c echo.Context) error {
 				return c.String(http.StatusBadRequest, err.Error())
 			}
 			for _, number := range phoneBook.Numbers {
-				err = sms.MessageService.SendPeriodicTemplateMessage(user, number.PhoneNumber, template.Expression, body.Interval)
+				err = sms.MessageService.SendPeriodicTemplateMessage(user, number.Number, template.Expression, body.Interval)
 				if err != nil {
 					return c.String(http.StatusInternalServerError, "Failed to send message: "+err.Error())
 				}

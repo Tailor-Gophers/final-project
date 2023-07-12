@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"qsms/models"
 	"qsms/repository"
+	"qsms/utils"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,21 +36,14 @@ type Words struct {
 }
 
 var regex *regexp.Regexp
+var config *utils.Config
 
 func NewMessageService(messageRepository repository.MessageRepository,
 	userRepository repository.UserRepository) MessageService {
 
-	data, err := os.ReadFile("./bad_words.json")
-	if err != nil {
-		fmt.Println("Error while reading bad_words.json: ", err)
-	}
-	var badWords Words
-	err = json.Unmarshal(data, &badWords)
-	if err != nil {
-		fmt.Println("Error while converting bad_words.json: ", err)
-	}
+	config = utils.LoadConfig()
 
-	pattern := "\\b(" + strings.Join(badWords.Words, "|") + ")\\b"
+	pattern := "\\b(" + strings.Join(config.BadWords, "|") + ")\\b"
 	regex = regexp.MustCompile(pattern)
 
 	return &messageService{
@@ -60,18 +52,12 @@ func NewMessageService(messageRepository repository.MessageRepository,
 	}
 }
 
-const (
-	SimpleMessageFee   = 10 //charge for basic message sending
-	PeriodicMessageFee = 5  //charge for setting a scheduler
-	TemplateFee        = 5  //charge for setting a template
-)
-
 func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, text string) error {
 
-	if user.Balance < SimpleMessageFee {
+	if user.Balance < config.SimpleMessageFee {
 		return errors.New("insufficient balance")
 	}
-	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-SimpleMessageFee)
+	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-config.SimpleMessageFee)
 	if err != nil {
 		return err
 	}
@@ -103,7 +89,7 @@ func (ms *messageService) SendSimpleMessage(user *models.User, receiver string, 
 
 func (ms *messageService) SendTemplateMessage(user *models.User, receiver string, template string) error {
 
-	totalCost := SimpleMessageFee + TemplateFee
+	totalCost := config.SimpleMessageFee + config.TemplateFee
 	if user.Balance < totalCost {
 		return errors.New("insufficient balance")
 	}
@@ -138,12 +124,12 @@ func (ms *messageService) SendTemplateMessage(user *models.User, receiver string
 
 func (ms *messageService) SendPeriodicSimpleMessage(user *models.User, receiver string, text string, interval string) error {
 
-	totalCost := SimpleMessageFee + PeriodicMessageFee //having money for at least one message sending
+	totalCost := config.SimpleMessageFee + config.PeriodicMessageFee //having money for at least one message sending
 
 	if user.Balance < totalCost {
 		return errors.New("insufficient balance")
 	}
-	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-PeriodicMessageFee)
+	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-config.PeriodicMessageFee)
 	if err != nil {
 		return errors.New("failed to update balance: " + err.Error())
 	}
@@ -169,12 +155,12 @@ func (ms *messageService) SendPeriodicSimpleMessage(user *models.User, receiver 
 }
 
 func (ms *messageService) SendPeriodicTemplateMessage(user *models.User, receiver string, template string, interval string) error {
-	totalCost := SimpleMessageFee + PeriodicMessageFee //having money for at least one message sending
+	totalCost := config.PeriodicMessageFee + config.PeriodicMessageFee + config.TemplateFee //having money for at least one message sending
 
 	if user.Balance < totalCost {
 		return errors.New("insufficient balance")
 	}
-	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-PeriodicMessageFee)
+	err := ms.UserRepository.UpdateBalance(user.ID, user.Balance-(config.PeriodicMessageFee+config.TemplateFee))
 	if err != nil {
 		return err
 	}

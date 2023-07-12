@@ -62,7 +62,7 @@ func NewApp() *App {
 
 	phoneBookGroup := userGroup.Group("/phonebook", middlewares.NotSuspended)
 	phoneBookGroup.POST("/create", userController.CreatePhoneBook)
-	phoneBookGroup.PUT("/addNumber/:id/:nid", userController.AddNumberToPhoneBook)
+	phoneBookGroup.PUT("/addNumber/:id/:num", userController.AddNumberToPhoneBook)
 	phoneBookGroup.DELETE("/delete/:id", userController.DeletePhoneBook)
 
 	templateGroup := userGroup.Group("/template", middlewares.NotSuspended)
@@ -79,6 +79,8 @@ func NewApp() *App {
 
 	adminGroup := e.Group("/sms/admin", middlewares.IsAdmin)
 	adminGroup.POST("/addNumber", adminController.AddNumber)
+	adminGroup.POST("/addBadWord", adminController.AddBadWord)
+	adminGroup.PUT("/setFee", adminController.SetFee)
 	adminGroup.PUT("/suspend/:id", adminController.SuspendUser)
 	adminGroup.PUT("/unsuspend/:id", adminController.UnSuspendUser)
 	adminGroup.GET("/count/:id", adminController.CountUserMessages)

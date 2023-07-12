@@ -38,3 +38,12 @@ Content-Type: application/json
 {
   "words" : ["gay", "boo"]
 }
+
+###
+POST http://localhost:3000/sms/admin/addBadWord
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTI2NTg5OCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.VlZRefFlJE9Cm4YeLnBRpWokbk0C5s3WxjNn_lzpzzw
+Content-Type: application/json
+
+{
+"words" : ["foo", "boo"]
+}

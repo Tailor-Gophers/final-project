@@ -21,7 +21,7 @@ type UserService interface {
 	DeleteContact(contactId uint) error
 	GetContact(contactId uint) (*models.Contact, error)
 	CreatePhoneBook(user *models.User, phonebook models.PhoneBook) error
-	UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error
+	UpdatePhoneBook(phonebook *models.PhoneBook, number string) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
 	DeletePhoneBook(phonebookId uint) error
 	GetNumberByID(numberId uint) (*models.Number, error)
@@ -113,7 +113,7 @@ func (us *userService) CreatePhoneBook(user *models.User, phonebook models.Phone
 	return us.userRepository.CreatePhoneBook(user, phonebook)
 }
 
-func (us *userService) UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error {
+func (us *userService) UpdatePhoneBook(phonebook *models.PhoneBook, number string) error {
 	return us.userRepository.UpdatePhoneBook(phonebook, number)
 }
 

@@ -1,15 +1,19 @@
 ### Create Phone Book ###
 POST http://localhost:3000/sms/user/phonebook/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
 
 {
-  "name": "My Phone Book 3"
+  "name": "My Phone Book 1"
 }
 
 ### Delete Phone Book ###
-DELETE http://localhost:3000/sms/user/phonebook/delete/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkwMDQzNzAsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.UsMnkW9jrtOG_SrTnuyFqkydoABeEd4kWktoe8iasdc
+DELETE http://localhost:3000/sms/user/phonebook/delete/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
+
+###
+PUT http://localhost:3000/sms/user/phonebook/addNumber/1/+989124652428
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
 
 ###
 

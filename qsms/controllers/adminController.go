@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"qsms/models"
 	"qsms/services"
+	"qsms/utils"
 	"strconv"
 )
 
@@ -23,11 +24,16 @@ type numberRequestForm struct {
 type searchRequestForm struct {
 	Words []string `json:"words"`
 }
+type setFeeRequestForm struct {
+	SimpleMessageFee   int `json:"simple_message_fee"`
+	PeriodicMessageFee int `json:"periodic_message_fee"`
+	TemplateFee        int `json:"template_fee"`
+}
 
 func (ac *AdminController) AddNumber(c echo.Context) error {
 	body := numberRequestForm{}
 	err := c.Bind(&body)
-	if err != nil {
+	if err != nil || len(body.PhoneNumber) < 10 || body.Price < 0 {
 		return c.String(http.StatusBadRequest, "Invalid request body!")
 	}
 
@@ -86,10 +92,50 @@ func (ac *AdminController) CountUserMessages(c echo.Context) error {
 func (ac *AdminController) SearchMessages(c echo.Context) error {
 	body := searchRequestForm{}
 	err := c.Bind(&body)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid body!")
+	}
 
 	messageFound, err := ac.AdminService.SearchMessages(body.Words)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to search messages: "+err.Error())
 	}
 	return c.JSON(http.StatusOK, messageFound)
+}
+
+func (ac *AdminController) AddBadWord(c echo.Context) error {
+	body := searchRequestForm{}
+	err := c.Bind(&body)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid body!")
+	}
+
+	config := utils.LoadConfig()
+	utils.AddBadWord(config, body.Words)
+
+	err = utils.SaveConfig(config)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to save config: "+err.Error())
+	}
+	return c.String(http.StatusOK, "Success!")
+}
+
+func (ac *AdminController) SetFee(c echo.Context) error {
+	body := setFeeRequestForm{}
+	err := c.Bind(&body)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid body!")
+	}
+
+	config := utils.LoadConfig()
+
+	config.SimpleMessageFee = body.SimpleMessageFee
+	config.PeriodicMessageFee = body.PeriodicMessageFee
+	config.TemplateFee = body.TemplateFee
+
+	err = utils.SaveConfig(config)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to save config: "+err.Error())
+	}
+	return c.String(http.StatusOK, "Success!")
 }

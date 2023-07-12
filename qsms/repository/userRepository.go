@@ -25,7 +25,7 @@ type UserRepository interface {
 	DeleteContact(contactId uint) error
 	GetContact(contactId uint) (*models.Contact, error)
 	CreatePhoneBook(user *models.User, phonebook models.PhoneBook) error
-	UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error
+	UpdatePhoneBook(phonebook *models.PhoneBook, number string) error
 	GetPhoneBook(phonebookId uint) (*models.PhoneBook, error)
 	DeletePhoneBook(phonebookId uint) error
 	GetNumberByID(numberId uint) (*models.Number, error)
@@ -172,9 +172,13 @@ func (ur *userGormRepository) CreatePhoneBook(user *models.User, phonebook model
 	return nil
 }
 
-func (ur *userGormRepository) UpdatePhoneBook(phonebook *models.PhoneBook, number *models.Number) error {
+func (ur *userGormRepository) UpdatePhoneBook(phonebook *models.PhoneBook, number string) error {
 	ur.db.Model(phonebook).Association("Numbers")
-	return ur.db.Model(phonebook).Association("Numbers").Append(number)
+	raw := &models.RawNumber{
+		PhoneBookID: phonebook.ID,
+		Number:      number,
+	}
+	return ur.db.Model(phonebook).Association("Numbers").Append(raw)
 }
 
 func (ur *userGormRepository) GetPhoneBook(phonebookId uint) (*models.PhoneBook, error) {
@@ -198,7 +202,7 @@ func (ur *userGormRepository) GetNumberByID(numberId uint) (*models.Number, erro
 
 func (ur *userGormRepository) GetUserByID(userId uint) (*models.User, error) {
 	var user models.User
-	err := ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("PhoneBooks.Numbers").Preload("Contacts").Preload("Templates").First(&user, userId).Error
+	err := ur.db.Preload("Numbers").Preload("PhoneBooks").Preload("Contacts").Preload("Templates").First(&user, userId).Error
 	if err != nil {
 		return nil, err
 	}
