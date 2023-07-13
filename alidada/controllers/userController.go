@@ -228,6 +228,11 @@ func (u *UserController) GetMyTickets(c echo.Context) error {
 	return c.JSON(http.StatusOK, Tickets)
 }
 
+func (u *UserController) PassReservation(c echo.Context) error {
+	reservationId := c.Param("id")
+	return c.JSON(http.StatusOK, reservationId)
+}
+
 func validatePassword(password string) bool {
 	//Constraints
 	lengthConstraint := len(password) >= 8

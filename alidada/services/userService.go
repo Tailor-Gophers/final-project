@@ -251,7 +251,7 @@ func GeneratePdf(reservations []models.Reservation, saveTo string) error {
 		m.Line(10)
 		col1 := fmt.Sprintf("%d- Name: %s %s | Date of birth: %s | National code: %s | Passport : %s ", i+1, reservation.Passenger.FirstName, reservation.Passenger.LastName, reservation.Passenger.DateOfBirth, reservation.Passenger.Nationality, reservation.Passenger.PassportNumber)
 		col2 := fmt.Sprintf("https://Alidada.com/passenger/%d", reservation.PassengerID)
-		col3 := fmt.Sprintf("https://Alidada.com/pass/reservation/%d", reservation.ID)
+		col3 := fmt.Sprintf("%s/pass/reservation/%d", utils.ENV("URL"), reservation.ID)
 		col4 := fmt.Sprintf("CODE: %d | DATE: %s | Origin: %s | Destination: %s ", reservation.FlightClass.ID, reservation.FlightClass.Flight.StartTime.Format("2006-01-02 15:04:05"), reservation.FlightClass.Flight.Origin, reservation.FlightClass.Flight.Destination)
 
 		m.Row(40, func() {

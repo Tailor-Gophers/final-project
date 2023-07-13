@@ -1,18 +1,21 @@
 package middlewares
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
+	"alidada/controllers"
+	"net/http"
+
+	echo "github.com/labstack/echo/v4"
 )
 
 func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get("user").(*jwt.Token)
-		claims := user.Claims.(jwt.MapClaims)
-		isAdmin := claims["admin"].(bool)
-
-		if isAdmin == false {
-			return echo.ErrUnauthorized
+		userController := controllers.NewUserController()
+		user, err := userController.UserByToken(c)
+		if err != nil {
+			return c.String(http.StatusUnauthorized, "You must be logged in!")
+		}
+		if user.IsAdmin == false {
+			return c.String(http.StatusUnauthorized, "You must be admin !")
 		}
 
 		return next(c)

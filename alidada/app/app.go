@@ -2,6 +2,7 @@ package app
 
 import (
 	"alidada/controllers"
+	"alidada/middlewares"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -46,6 +47,8 @@ func alidadaRouting(e *echo.Echo) {
 	reservationGroup := e.Group("/api/reservation")
 	reservationGroup.POST("/reserve", reservationController.Reserve)
 	reservationGroup.GET("/verify", reservationController.Verify) //http://www.yoursite.ir/?Authority=A00000000000000000000000000202690354&Status=OK ????
+
+	e.GET("/api/pass/reservation/:id", userController.PassReservation, middlewares.IsAdmin)
 
 	e.GET("/flights/search", flightController.SearchFlightsDay)
 	e.GET("/flights/sort/:orderBy", flightController.SearchFlightsSort)
