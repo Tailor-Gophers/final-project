@@ -71,7 +71,9 @@ func (s *userService) GetPassengers(user *models.User) ([]models.Passenger, erro
 
 func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, error) {
 	reservations, err := s.userRepository.GetReservationsByUserId(user.ID)
-
+	if err != nil {
+		return nil, err
+	}
 	for i, _ := range reservations {
 		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
@@ -88,6 +90,9 @@ func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, err
 
 func (s *userService) GetMyTicketsPdf(user *models.User, id string) (string, error) {
 	reservations, err := s.userRepository.GetReservationsByOrderId(id, user.ID)
+	if err != nil {
+		return "", err
+	}
 	for i, _ := range reservations {
 		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
 		if err != nil {
@@ -185,19 +190,31 @@ func GetFlightClassByID(id int) (models.FlightClass, error) {
 }
 
 func (s *userService) CancellTicket(user *models.User, id string) (string, error) {
-	reservation, _ := s.userRepository.GetReservationById(id, user.ID)
-	cancellationConditions, _ := s.userRepository.GetCancellationConditionsByFlightClassID(reservation.FlightClassID)
+	reservation, err := s.userRepository.GetReservationById(id, user.ID)
+	if err != nil {
+		return "", err
+	}
+	cancellationConditions, err := s.userRepository.GetCancellationConditionsByFlightClassID(reservation.FlightClassID)
+	if err != nil {
+		return "", err
+	}
 	sortedCancellationConditions := Sort(cancellationConditions, 0, len(*cancellationConditions)-1)
 	flightclass, err := GetFlightClassByID(int(reservation.FlightClassID))
 	if err != nil {
 		errors.New("Failed to decode flights from mockapi")
 	}
-	penalty, err2 := PenaltyCalculation(reservation, &flightclass, sortedCancellationConditions)
-	if err2 != nil {
-		return "", err2
+	penalty, err := PenaltyCalculation(reservation, &flightclass, sortedCancellationConditions)
+	if err != nil {
+		return "", err
 	}
-	s.userRepository.AnnouncingcancellationToMockByFlightClassID(reservation.FlightClassID)
-	s.userRepository.CancellReservationById(reservation.ID)
+	err = s.userRepository.AnnouncingcancellationToMockByFlightClassID(reservation.FlightClassID)
+	if err != nil {
+		return "", err
+	}
+	err = s.userRepository.CancellReservationById(reservation.ID)
+	if err != nil {
+		return "", err
+	}
 	result := fmt.Sprintf("your penalty is: %d", penalty)
 	return result, nil
 }
