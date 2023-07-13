@@ -41,6 +41,7 @@ func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*m
 
 	err = json.NewDecoder(res.Body).Decode(&flightClass)
 
+	flightClass.Price = GetPrice(flightClass)
 	if int(flightClass.Capacity-*flightClass.Reserve) < len(passengers) {
 		return nil, errors.New(fmt.Sprintf("Not enouph capacity in flight %d ", flightClassId))
 	}
@@ -85,4 +86,34 @@ func (rs *reservationService) GetOrderByAuthority(authority string) (*models.Ord
 
 func (rs *reservationService) ConfirmOrder(orderId uint, refId int) error {
 	return rs.reservationRepository.ConfirmOrder(orderId, refId)
+}
+
+func SmartPrice(flightclasses []models.FlightClass) []models.FlightClass {
+	for i, flightclass := range flightclasses {
+		flightclasses[i].Price = GetPrice(flightclass)
+	}
+	return flightclasses
+}
+
+func GetPrice(flightclass models.FlightClass) uint {
+
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 10 {
+		return uint(float32(flightclass.Price) * 0.8)
+	}
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 20 {
+		return uint(float32(flightclass.Price) * 0.9)
+	}
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 50 {
+		return uint(float32(flightclass.Price) * 0.95)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 60 {
+		return uint(float32(flightclass.Price) * 1.1)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 70 {
+		return uint(float32(flightclass.Price) * 1.3)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 80 {
+		return uint(float32(flightclass.Price) * 1.5)
+	}
+	return uint(float32(flightclass.Price) * 2)
 }

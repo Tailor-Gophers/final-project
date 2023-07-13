@@ -90,7 +90,37 @@ func (f *FlightController) SearchFlightsSort(c echo.Context) error {
 		flightclass = append([]models.FlightClass{fakeFlightClass[0], fakeFlightClass[1]}, result...)
 	}
 
-	return c.JSON(http.StatusOK, flightclass)
+	return c.JSON(http.StatusOK, SmartPrice(flightclass))
+}
+
+func SmartPrice(flightclasses []models.FlightClass) []models.FlightClass {
+	for i, flightclass := range flightclasses {
+		flightclasses[i].Price = GetPrice(flightclass)
+	}
+	return flightclasses
+}
+
+func GetPrice(flightclass models.FlightClass) uint {
+
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 10 {
+		return uint(float32(flightclass.Price) * 0.8)
+	}
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 20 {
+		return uint(float32(flightclass.Price) * 0.9)
+	}
+	if int(*flightclass.Reserve)*100/int(flightclass.Capacity) < 50 {
+		return uint(float32(flightclass.Price) * 0.95)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 60 {
+		return uint(float32(flightclass.Price) * 1.1)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 70 {
+		return uint(float32(flightclass.Price) * 1.3)
+	}
+	if *flightclass.Reserve*100/flightclass.Capacity < 80 {
+		return uint(float32(flightclass.Price) * 1.5)
+	}
+	return uint(float32(flightclass.Price) * 2)
 }
 
 func (f *FlightController) FilterFlights(c echo.Context) error {
@@ -116,5 +146,5 @@ func (f *FlightController) FilterFlights(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, flightclass)
+	return c.JSON(http.StatusOK, SmartPrice(flightclass))
 }
