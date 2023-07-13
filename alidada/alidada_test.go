@@ -256,6 +256,15 @@ func TestSearchFlightsSort(t *testing.T) {
 			Title:    "Class-A",
 			Price:    1900,
 			Capacity: 50,
+			FlightId: 6,
+		},
+		{
+			Model: models.Model{
+				ID: 4,
+			},
+			Title:    "Class-A",
+			Price:    1900,
+			Capacity: 50,
 			FlightId: 2,
 		},
 		{
@@ -272,15 +281,6 @@ func TestSearchFlightsSort(t *testing.T) {
 				ID: 3,
 			},
 			Title:    "Class-C",
-			Price:    1400,
-			Capacity: 50,
-			FlightId: 6,
-		},
-		{
-			Model: models.Model{
-				ID: 4,
-			},
-			Title:    "Class-D",
 			Price:    1300,
 			Capacity: 50,
 			FlightId: 6,
@@ -325,7 +325,7 @@ func TestFilterFlights(t *testing.T) {
 	expectedFlightClass := []FlightClassComparison{
 		{
 			Model: models.Model{
-				ID: 1,
+				ID: 4,
 			},
 			Title:    "Class-A",
 			Price:    1900,
