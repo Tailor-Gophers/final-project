@@ -99,7 +99,7 @@ func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Redu
 		if err.Error() == "flight capacity reached" {
 			return c.String(http.StatusNotFound, "Flight capacity reached!")
 		}
-		return c.String(http.StatusNotFound, "No Flight Found!")
+		return c.String(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, result)
 }

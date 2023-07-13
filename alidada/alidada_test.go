@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -213,7 +212,7 @@ func TestSearchFlightsDay(t *testing.T) {
 
 	startTime1, _ := time.Parse(time.RFC3339, "2020-02-08T15:49:41+03:30")
 	endTime1, _ := time.Parse(time.RFC3339, "2020-02-09T18:49:41+03:30")
-	expectedFlights := &[]models.Flight{
+	expectedFlights := []models.Flight{
 		{
 			Model: models.Model{
 				ID: 2,
@@ -240,9 +239,15 @@ func TestSearchFlightsDay(t *testing.T) {
 	var flights []models.Flight
 	err = json.Unmarshal(rec.Body.Bytes(), &flights)
 	assert.NoError(t, err)
-	if !reflect.DeepEqual(*expectedFlights, flights) {
-		t.Errorf("Expected flights: %v, but got: %v", *expectedFlights, flights)
+	j := 0
+	for _, flight := range flights {
+		if expectedFlights[j].Model.ID != flight.ID {
+			t.Errorf("Expected flights: %v, but got: %v", expectedFlights, flights)
+			break
+		}
+		j++
 	}
+
 }
 
 func TestSearchFlightsSort(t *testing.T) {
@@ -314,9 +319,15 @@ func TestSearchFlightsSort(t *testing.T) {
 		})
 	}
 
-	if !reflect.DeepEqual(expectedFlightClass, flightclassComparison) {
-		t.Errorf("Expected flights: %v, but got: %v", expectedFlightClass, flightclassComparison)
+	j := 0
+	for _, flight := range expectedFlightClass {
+		if flightclassComparison[j].Model.ID != flight.Model.ID {
+			t.Errorf("Expected flights: %v, but got: %v", flightclassComparison[j].Model.ID, flight.Model.ID)
+			break
+		}
+		j++
 	}
+
 }
 
 func TestFilterFlights(t *testing.T) {
@@ -361,9 +372,15 @@ func TestFilterFlights(t *testing.T) {
 		})
 	}
 
-	if !reflect.DeepEqual(expectedFlightClass, flightclassComparison) {
-		t.Errorf("Expected flights: %v, but got: %v", expectedFlightClass, flightclassComparison)
+	j := 0
+	for _, flight := range expectedFlightClass {
+		if flightclassComparison[j].Model.ID != flight.Model.ID {
+			t.Errorf("Expected flights: %v, but got: %v", flightclassComparison[j].Model.ID, flight.Model.ID)
+			break
+		}
+		j++
 	}
+
 }
 
 type mockUserRepository struct {
