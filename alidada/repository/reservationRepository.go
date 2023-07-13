@@ -35,7 +35,6 @@ func (rr *reservationGormRepository) PlaceOrder(order *models.Order) error {
 func (rr *reservationGormRepository) CanReserve(passengers []uint, flightClassId uint) error {
 	var reservation models.Reservation
 	err := rr.db.Where("passenger_id IN ?", passengers).Where("flight_class_id = ?", flightClassId).Where("confirmed =?", true).First(&reservation).Error
-	fmt.Println(reservation)
 	if err == nil {
 		return errors.New(fmt.Sprintf("reservation alredy exist : id:%d", reservation.PassengerID))
 	} else {

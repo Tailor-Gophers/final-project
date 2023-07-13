@@ -33,10 +33,8 @@ func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*m
 	var flightClass models.FlightClass
 
 	url := fmt.Sprintf("%s/flight_class/%d", utils.ENV("MOCK_URL"), flightClassId)
-	fmt.Println(url)
 	res, err := http.Get(url)
 	if err != nil {
-		fmt.Println(err)
 		return nil, errors.New(fmt.Sprintf("Failed to get flight with id %d from mock api", flightClassId))
 	}
 	defer res.Body.Close()

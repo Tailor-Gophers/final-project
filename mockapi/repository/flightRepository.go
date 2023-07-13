@@ -35,7 +35,7 @@ func NewGormFlightRepository() FlightRepository {
 
 func (fl *flightGormRepository) GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]models.Flight, error) {
 	var flights []models.Flight
-	result := fl.db.Where("origin = ? and destination = ? and date(start_time) = date(?)", origin, destination, day).Find(&flights)
+	result := fl.db.Where("origin = ? and destination = ? and date(start_time) = date(?)", origin, destination, day).Order("id").Find(&flights)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("flights not found")

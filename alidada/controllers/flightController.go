@@ -38,7 +38,6 @@ func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 			"error": "Failed to decode flights from mockapi response",
 		})
 	}
-
 	return c.JSON(http.StatusOK, flights)
 }
 

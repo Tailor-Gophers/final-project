@@ -34,43 +34,43 @@ type UserService interface {
 	GetMyTicketsPdf(user *models.User, id string) (string, error)
 }
 
-type userService struct {
-	userRepository repository.UserRepository
+type UserServicet struct {
+	UserRepository repository.UserRepository
 }
 
 func NewUserService() UserService {
-	return &userService{
-		userRepository: repository.NewGormUserRepository(),
+	return &UserServicet{
+		UserRepository: repository.NewGormUserRepository(),
 	}
 }
 
-func (s *userService) CreateUser(user *models.User) error {
+func (s *UserServicet) CreateUser(user *models.User) error {
 	hashed, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 	user.Password = hashed
-	return s.userRepository.CreateUser(user)
+	return s.UserRepository.CreateUser(user)
 }
 
-func (s *userService) GetUserByUserName(username string) (*models.User, error) {
-	return s.userRepository.GetUserByUserName(username)
+func (s *UserServicet) GetUserByUserName(username string) (*models.User, error) {
+	return s.UserRepository.GetUserByUserName(username)
 }
 
-func (s *userService) GetUserByEmail(email string) (*models.User, error) {
-	return s.userRepository.GetUserByEmail(email)
+func (s *UserServicet) GetUserByEmail(email string) (*models.User, error) {
+	return s.UserRepository.GetUserByEmail(email)
 }
 
-func (s *userService) CreatePassenger(passenger *models.Passenger) error {
-	return s.userRepository.CreatePassenger(passenger)
+func (s *UserServicet) CreatePassenger(passenger *models.Passenger) error {
+	return s.UserRepository.CreatePassenger(passenger)
 }
 
-func (s *userService) GetPassengers(user *models.User) ([]models.Passenger, error) {
-	return s.userRepository.GetPassengers(user)
+func (s *UserServicet) GetPassengers(user *models.User) ([]models.Passenger, error) {
+	return s.UserRepository.GetPassengers(user)
 }
 
-func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, error) {
-	reservations, err := s.userRepository.GetReservationsByUserId(user.ID)
+func (s *UserServicet) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+	reservations, err := s.UserRepository.GetReservationsByUserId(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +88,8 @@ func (s *userService) GetMyTickets(user *models.User) ([]models.Reservation, err
 	return reservations, nil
 }
 
-func (s *userService) GetMyTicketsPdf(user *models.User, id string) (string, error) {
-	reservations, err := s.userRepository.GetReservationsByOrderId(id, user.ID)
+func (s *UserServicet) GetMyTicketsPdf(user *models.User, id string) (string, error) {
+	reservations, err := s.UserRepository.GetReservationsByOrderId(id, user.ID)
 	if err != nil {
 		return "", err
 	}
@@ -150,7 +150,6 @@ func GetFlightClassByID(id int) (models.FlightClass, error) {
 
 	if err == redis.Nil {
 		//key does not exist
-		fmt.Println(1)
 		url := fmt.Sprintf("%s/flight_class/%d", utils.ENV("MOCK_URL"), id)
 
 		res, err := http.Get(url)
@@ -173,7 +172,6 @@ func GetFlightClassByID(id int) (models.FlightClass, error) {
 		return flightclass, nil
 	}
 	if err != nil {
-		fmt.Println(2)
 
 		return models.FlightClass{}, fmt.Errorf("redis error")
 
@@ -187,12 +185,12 @@ func GetFlightClassByID(id int) (models.FlightClass, error) {
 
 }
 
-func (s *userService) CancellTicket(user *models.User, id string) (string, error) {
-	reservation, err := s.userRepository.GetReservationById(id, user.ID)
+func (s *UserServicet) CancellTicket(user *models.User, id string) (string, error) {
+	reservation, err := s.UserRepository.GetReservationById(id, user.ID)
 	if err != nil {
 		return "", err
 	}
-	cancellationConditions, err := s.userRepository.GetCancellationConditionsByFlightClassID(reservation.FlightClassID)
+	cancellationConditions, err := s.UserRepository.GetCancellationConditionsByFlightClassID(reservation.FlightClassID)
 	if err != nil {
 		return "", err
 	}
@@ -205,11 +203,11 @@ func (s *userService) CancellTicket(user *models.User, id string) (string, error
 	if err != nil {
 		return "", err
 	}
-	err = s.userRepository.AnnouncingcancellationToMockByFlightClassID(reservation.FlightClassID)
+	err = s.UserRepository.AnnouncingcancellationToMockByFlightClassID(reservation.FlightClassID)
 	if err != nil {
 		return "", err
 	}
-	err = s.userRepository.CancellReservationById(reservation.ID)
+	err = s.UserRepository.CancellReservationById(reservation.ID)
 	if err != nil {
 		return "", err
 	}
@@ -251,7 +249,7 @@ func GeneratePdf(reservations []models.Reservation, saveTo string) error {
 		m.Line(10)
 		col1 := fmt.Sprintf("%d- Name: %s %s | Date of birth: %s | National code: %s | Passport : %s ", i+1, reservation.Passenger.FirstName, reservation.Passenger.LastName, reservation.Passenger.DateOfBirth, reservation.Passenger.Nationality, reservation.Passenger.PassportNumber)
 		col2 := fmt.Sprintf("https://Alidada.com/passenger/%d", reservation.PassengerID)
-		col3 := fmt.Sprintf("%s/pass/reservation/%d", utils.ENV("URL"), reservation.ID)
+		col3 := fmt.Sprintf("%s/api/pass/reservation/%d", utils.ENV("URL"), reservation.ID)
 		col4 := fmt.Sprintf("CODE: %d | DATE: %s | Origin: %s | Destination: %s ", reservation.FlightClass.ID, reservation.FlightClass.Flight.StartTime.Format("2006-01-02 15:04:05"), reservation.FlightClass.Flight.Origin, reservation.FlightClass.Flight.Destination)
 
 		m.Row(40, func() {
@@ -314,23 +312,23 @@ func GeneratePdf(reservations []models.Reservation, saveTo string) error {
 	}
 	return nil
 }
-func (s *userService) SaveToken(user *models.User, token string) error {
-	return s.userRepository.SaveToken(user, token)
+func (s *UserServicet) SaveToken(user *models.User, token string) error {
+	return s.UserRepository.SaveToken(user, token)
 }
 
-func (s *userService) RefreshToken(user *models.User, token string) error {
-	return s.userRepository.SaveToken(user, token)
+func (s *UserServicet) RefreshToken(user *models.User, token string) error {
+	return s.UserRepository.SaveToken(user, token)
 }
 
-func (s *userService) DeleteUser(username string) error {
+func (s *UserServicet) DeleteUser(username string) error {
 	//todo if needed
 	return nil
 }
 
-func (s *userService) UserByToken(token string) (*models.User, error) {
-	return s.userRepository.UserByToken(token)
+func (s *UserServicet) UserByToken(token string) (*models.User, error) {
+	return s.UserRepository.UserByToken(token)
 }
 
-func (s *userService) LogOut(token string) error {
-	return s.userRepository.LogOut(token)
+func (s *UserServicet) LogOut(token string) error {
+	return s.UserRepository.LogOut(token)
 }
