@@ -3,6 +3,7 @@ package repository
 import (
 	"alidada/db"
 	"alidada/models"
+	"alidada/utils"
 	"errors"
 	"fmt"
 	"net/http"
@@ -69,7 +70,7 @@ func (rr *reservationGormRepository) ConfirmOrder(orderId uint, refId int) error
 	var reservations []models.Reservation
 	rr.db.Where("order_id = ?", orderId).Find(&reservations)
 
-	url := fmt.Sprintf("http://localhost:3001/flights/%d/reserve/%d", reservations[0].FlightClassID, len(reservations))
+	url := fmt.Sprintf("%s/flights/%d/reserve/%d", utils.ENV("MOCK_URL"), reservations[0].FlightClassID, len(reservations))
 	res, err := http.Post(url, "", nil)
 	if err != nil {
 		return fmt.Errorf("Failed to reserve flights from mockapi")

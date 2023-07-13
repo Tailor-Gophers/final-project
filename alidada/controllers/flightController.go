@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"alidada/models"
+	"alidada/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -20,7 +21,7 @@ func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 	destination := c.QueryParam("destination")
 	dateStr := c.QueryParam("date")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/%s/%s/%s", origin, destination, dateStr)
+	url := fmt.Sprintf("%s/flights/%s/%s/%s", utils.ENV("MOCK_URL"), origin, destination, dateStr)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -44,7 +45,7 @@ func (f *FlightController) SearchFlightsSort(c echo.Context) error {
 	orderBy := c.Param("orderBy")
 	order := c.QueryParam("order")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/sort/%s?order=%s", orderBy, order)
+	url := fmt.Sprintf("%s/flights/sort/%s?order=%s", utils.ENV("MOCK_URL"), orderBy, order)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -70,7 +71,7 @@ func (f *FlightController) FilterFlights(c echo.Context) error {
 	departure := c.QueryParam("departure")
 	capacity := c.QueryParam("capacity")
 
-	url := fmt.Sprintf("http://localhost:3001/flights/filter?airline=%s&aircraft=%s&departure=%s&capacity=%s", airline, aircraft, departure, capacity)
+	url := fmt.Sprintf("%s/flights/filter?airline=%s&aircraft=%s&departure=%s&capacity=%s", utils.ENV("MOCK_URL"), airline, aircraft, departure, capacity)
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{

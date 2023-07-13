@@ -4,18 +4,11 @@ import (
 	"alidada/db"
 	"alidada/models"
 	"alidada/utils"
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	redis "github.com/redis/go-redis/v9"
-
-	"github.com/johnfercher/maroto/pkg/consts"
-	"github.com/johnfercher/maroto/pkg/pdf"
-	"github.com/johnfercher/maroto/pkg/props"
 	"gorm.io/gorm"
 )
 
@@ -29,10 +22,13 @@ type UserRepository interface {
 	GetPassengers(user *models.User) ([]models.Passenger, error)
 	SaveToken(user *models.User, token string) error
 	UserByToken(token string) (*models.User, error)
+	GetReservationsByUserId(id uint) ([]models.Reservation, error)
+	GetReservationsByOrderId(id string, userId uint) ([]models.Reservation, error)
+	GetReservationById(id string, userId uint) (*models.Reservation, error)
+	GetCancellationConditionsByFlightClassID(id uint) (*[]models.CancellationCondition, error)
+	AnnouncingcancellationToMockByFlightClassID(id uint) error
+	CancellReservationById(id uint) error
 	LogOut(token string) error
-	GetMyTickets(user *models.User) ([]models.Reservation, error)
-	CancellTicket(user *models.User, id string) (string, error)
-	GetMyTicketsPdf(user *models.User, id string) (string, error)
 }
 
 type userGormRepository struct {
@@ -85,246 +81,60 @@ func (ur *userGormRepository) GetPassengers(user *models.User) ([]models.Passeng
 	return passengers, nil
 }
 
-func Sort(arr *[]models.CancellationCondition, start, end int) []models.CancellationCondition {
-	if start < end {
-		partitionIndex := partition(*arr, start, end)
-		Sort(arr, start, partitionIndex-1)
-		Sort(arr, partitionIndex+1, end)
-	}
-	return *arr
-}
-
-func partition(arr []models.CancellationCondition, start, end int) int {
-	pivot := arr[end].Penalty
-	pIndex := start
-	for i := start; i < end; i++ {
-		if arr[i].Penalty <= pivot {
-			//  swap
-			arr[i], arr[pIndex] = arr[pIndex], arr[i]
-			pIndex++
-		}
-	}
-	arr[pIndex], arr[end] = arr[end], arr[pIndex]
-	return pIndex
-}
-
-func (ur *userGormRepository) PenaltyCalculation(reservation *models.Reservation) (int, error) {
-	var cancellationConditions []models.CancellationCondition
-	ur.db.
-		Joins("JOIN flight_class_cancellations ON flight_class_cancellations.cancellation_condition_id = cancellation_conditions.id").
-		Where("flight_class_cancellations.flight_class_id = ?", reservation.FlightClassID).
-		Find(&cancellationConditions)
-
-	sortedCancellationConditions := Sort(&cancellationConditions, 0, len(cancellationConditions)-1)
-	flightclass, err := GetFlightClassByID(int(reservation.FlightClassID))
-	if err != nil {
-		errors.New("Failed to decode flights from mockapi")
-	}
-	for _, condition := range sortedCancellationConditions {
-		var t time.Duration
-		t = time.Duration(condition.TimeMinutes)
-		if flightclass.Flight.StartTime.Unix() < time.Now().Add(-1*time.Minute*t).Unix() {
-			return condition.Penalty * int(reservation.Price) / 100, nil
-		}
-	}
-	return 100, errors.New("None of the cancellation conditions are available for you")
-}
-
-func (ur *userGormRepository) CancellTicket(user *models.User, id string) (string, error) {
+func (ur *userGormRepository) GetReservationById(id string, userId uint) (*models.Reservation, error) {
 	var reservation models.Reservation
 	err := ur.db.
-		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+		Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", userId).
 		Where("confirmed =?", true).
 		Where("reservations.is_cancelled != 1").
 		Where("reservations.id = ?", id).
 		First(&reservation).Error
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	return &reservation, nil
+}
 
-	penalty, err2 := ur.PenaltyCalculation(&reservation)
-	if err2 != nil {
-		return "", err2
+func (ur *userGormRepository) GetCancellationConditionsByFlightClassID(id uint) (*[]models.CancellationCondition, error) {
+	var cancellationConditions []models.CancellationCondition
+	err := ur.db.
+		Joins("JOIN flight_class_cancellations ON flight_class_cancellations.cancellation_condition_id = cancellation_conditions.id").
+		Where("flight_class_cancellations.flight_class_id = ?", id).
+		Find(&cancellationConditions).Error
+	if err != nil {
+		return nil, err
 	}
+	return &cancellationConditions, nil
+}
 
-	url := fmt.Sprintf("http://localhost:3001/flights/%d/return", reservation.FlightClassID)
+func (ur *userGormRepository) AnnouncingcancellationToMockByFlightClassID(id uint) error {
+	url := fmt.Sprintf("%s/flights/%d/return", utils.ENV("MOCK_URL"), id)
 	res, err := http.Post(url, "", nil)
 	if err != nil {
-		return "", fmt.Errorf("Failed to decode flights from mockapi")
+		return fmt.Errorf("Failed to decode flights from mockapi")
 	}
 	defer res.Body.Close()
-	ur.db.Model(&models.Reservation{}).Where("id = ?", reservation.ID).Update("is_cancelled", true)
-
-	result := fmt.Sprintf("your penalty is: %d", penalty)
-
-	return result, nil
+	return nil
 }
-func (ur *userGormRepository) GetMyTickets(user *models.User) ([]models.Reservation, error) {
+func (ur *userGormRepository) CancellReservationById(id uint) error {
+	return ur.db.Model(&models.Reservation{}).Where("id = ?", id).Update("is_cancelled", true).Error
+}
+
+func (ur *userGormRepository) GetReservationsByUserId(id uint) ([]models.Reservation, error) {
 	var reservations []models.Reservation
-	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", id).
 		Select("reservations.*").Where("confirmed =?", true).
 		Preload("Passenger").Find(&reservations).Error
-
-	for i, _ := range reservations {
-		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	if err != nil {
 		return nil, err
 	}
-
 	return reservations, nil
 }
 
-func GetFlightClassByID(id int) (models.FlightClass, error) {
-	ctx := context.Background()
-	rdb := db.GetRedisConnection()
-	key := fmt.Sprintf("flightClass_%d", id)
-	val, err := rdb.Get(ctx, key).Result()
-	var flightclass models.FlightClass
-
-	if err == redis.Nil {
-		//key does not exist
-		fmt.Println(1)
-		url := fmt.Sprintf("http://localhost:3001/flight_class/%d", id)
-
-		res, err := http.Get(url)
-		if err != nil {
-			return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
-		}
-		defer res.Body.Close()
-
-		err = json.NewDecoder(res.Body).Decode(&flightclass)
-		if err != nil {
-			return models.FlightClass{}, fmt.Errorf("Failed to decode flights from mockapi")
-		}
-
-		flightclassMarshal, _ := json.Marshal(flightclass)
-
-		err2 := rdb.Set(ctx, key, flightclassMarshal, 100000000000).Err()
-		if err2 != nil {
-			return models.FlightClass{}, fmt.Errorf("cant Saving to redis")
-		}
-		return flightclass, nil
-	}
-	if err != nil {
-		fmt.Println(2)
-
-		return models.FlightClass{}, fmt.Errorf("redis error")
-
-	}
-
-	err = json.Unmarshal([]byte(val), &flightclass)
-	if err != nil {
-		return models.FlightClass{}, fmt.Errorf("Failed to decode flights from redis")
-	}
-	return flightclass, nil
-
-}
-
-func GeneratePdf(reservations []models.Reservation, saveTo string) error {
-	m := pdf.NewMaroto(consts.Portrait, consts.Letter)
-	//m.SetBorder(true)
-	m.AddUTF8Font("Shabnam", consts.Normal, "Shabnam.ttf")
-	for i, reservation := range reservations {
-
-		m.Row(40, func() {
-			m.Col(4, func() {
-				_ = m.FileImage("static/airplane.png", props.Rect{
-					Center:  true,
-					Percent: 80,
-				})
-			})
-
-			m.Col(4, func() {
-				m.Text(" Ali Dada Airlines | Tailor Gopher, Inc. ", props.Text{
-					Top:         12,
-					Size:        20,
-					Family:      "Shabnam",
-					Extrapolate: true,
-				})
-
-				m.Text("Automatic ticket issuing system", props.Text{
-					Size: 12,
-					Top:  22,
-				})
-			})
-			m.ColSpace(4)
-		})
-
-		m.Line(10)
-		col1 := fmt.Sprintf("%d- Name: %s %s | Date of birth: %s | National code: %s | Passport : %s ", i+1, reservation.Passenger.FirstName, reservation.Passenger.LastName, reservation.Passenger.DateOfBirth, reservation.Passenger.Nationality, reservation.Passenger.PassportNumber)
-		col2 := fmt.Sprintf("https://Alidada.com/passenger/%d", reservation.PassengerID)
-		col3 := fmt.Sprintf("https://Alidada.com/reservation/%d", reservation.ID)
-		col4 := fmt.Sprintf("CODE: %d | DATE: %s | Origin: %s | Destination: %s ", reservation.FlightClass.ID, reservation.FlightClass.Flight.StartTime.Format("2006-01-02 15:04:05"), reservation.FlightClass.Flight.Origin, reservation.FlightClass.Flight.Destination)
-
-		m.Row(40, func() {
-			m.Col(4, func() {
-				m.Text(col1, props.Text{
-					Size:   15,
-					Top:    12,
-					Family: "Shabnam",
-				})
-			})
-			m.ColSpace(4)
-			m.Col(4, func() {
-				m.QrCode(col2, props.Rect{
-					Center:  true,
-					Percent: 75,
-				})
-			})
-		})
-
-		m.Line(10)
-
-		m.Row(100, func() {
-			m.Col(12, func() {
-				_ = m.Barcode(col3, props.Barcode{
-					Center:  true,
-					Percent: 70,
-				})
-				m.Text("AliDada . com", props.Text{
-					Size:  20,
-					Align: consts.Center,
-					Top:   65,
-				})
-			})
-		})
-
-		m.SetBorder(true)
-
-		m.Row(40, func() {
-			m.Col(6, func() {
-				m.Text(col4, props.Text{
-					Size: 15,
-					Top:  14,
-				})
-			})
-			m.Col(6, func() {
-				m.Text(reservation.FlightClass.Title, props.Text{
-					Top:   1,
-					Size:  50,
-					Align: consts.Center,
-				})
-			})
-		})
-
-		m.SetBorder(false)
-
-	}
-	err2 := m.OutputFileAndClose(saveTo)
-	if err2 != nil {
-		return fmt.Errorf("pdf cant build")
-	}
-	return nil
-}
-
-func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (string, error) {
+func (ur *userGormRepository) GetReservationsByOrderId(id string, userId uint) ([]models.Reservation, error) {
 	var reservations []models.Reservation
-	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", user.ID).
+	err := ur.db.Joins("JOIN passengers ON passengers.id = reservations.passenger_id AND passengers.user_id = ?", userId).
 		Select("reservations.ID", "price", "passenger_id", "flight_class_id").
 		Where("order_id = ?", id).
 		Where("confirmed =?", true).
@@ -332,25 +142,16 @@ func (ur *userGormRepository) GetMyTicketsPdf(user *models.User, id string) (str
 		Preload("Passenger").
 		Find(&reservations).Error
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(reservations) == 0 {
-		return "", fmt.Errorf("not found")
+		return nil, fmt.Errorf("not found")
 	}
 
-	for i, _ := range reservations {
-		reservations[i].FlightClass, err = GetFlightClassByID(int(reservations[i].FlightClassID))
-		if err != nil {
-			return "", err
-		}
-	}
-	saveTo := fmt.Sprintf("pdf/ticketsOfOrder%s.pdf", id)
-
-	GeneratePdf(reservations, saveTo)
-
-	return saveTo, nil
+	return reservations, nil
 }
+
 func (ur *userGormRepository) DeleteUser(userId uint) error {
 	return ur.db.Delete(&models.User{}, userId).Error
 }

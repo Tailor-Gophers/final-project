@@ -1,6 +1,8 @@
 package services
 
 import (
+	"alidada/utils"
+
 	"alidada/models"
 	"alidada/repository"
 	"encoding/json"
@@ -30,7 +32,7 @@ func NewReservationService() ReservationService {
 func (rs *reservationService) Reserve(passengers []uint, flightClassId uint) (*models.Order, error) {
 	var flightClass models.FlightClass
 
-	url := fmt.Sprintf("http://localhost:3001/flight_class/%d", flightClassId)
+	url := fmt.Sprintf("%s/flight_class/%d", utils.ENV("MOCK_URL"), flightClassId)
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Failed to get flight with id %d from mock api", flightClassId))
