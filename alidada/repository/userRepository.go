@@ -29,6 +29,7 @@ type UserRepository interface {
 	AnnouncingcancellationToMockByFlightClassID(id uint) error
 	CancellReservationById(id uint) error
 	LogOut(token string) error
+	PassReservation(id string) (string, error)
 }
 
 type userGormRepository struct {
@@ -150,6 +151,30 @@ func (ur *userGormRepository) GetReservationsByOrderId(id string, userId uint) (
 	}
 
 	return reservations, nil
+}
+
+func (ur *userGormRepository) PassReservation(id string) (string, error) {
+	var reservations []models.Reservation
+	var reservation models.Reservation
+
+	err := ur.db.First(&reservation, id).Error
+	if err != nil {
+		return "", err
+	}
+	if reservation.IsCancelled == true || reservation.Confirmed == false {
+		return "", fmt.Errorf("this reservation Is Cancelled of not confirmed")
+	}
+	err = ur.db.
+		Where("flight_class_id = ?", reservation.FlightClassID).
+		Where("confirmed =?", true).
+		Where("is_cancelled != 1").Where("id <= ?", id).
+		Preload("Passenger").
+		Find(&reservations).Error
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%d_%d", int(reservation.FlightClassID), int(len(reservations)+1)), nil
 }
 
 func (ur *userGormRepository) DeleteUser(userId uint) error {

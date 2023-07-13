@@ -4,6 +4,7 @@ import (
 	"alidada/models"
 	"alidada/services"
 	"alidada/utils"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -230,7 +231,12 @@ func (u *UserController) GetMyTickets(c echo.Context) error {
 
 func (u *UserController) PassReservation(c echo.Context) error {
 	reservationId := c.Param("id")
-	return c.JSON(http.StatusOK, reservationId)
+	seatNumber, err := u.UserService.PassReservation(reservationId)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, fmt.Sprintf("your seat Number : %s", seatNumber))
 }
 
 func validatePassword(password string) bool {
