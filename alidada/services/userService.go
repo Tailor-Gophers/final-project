@@ -106,7 +106,6 @@ func (s *userService) GetMyTicketsPdf(user *models.User, id string) (string, err
 	return saveTo, nil
 }
 
-// unit
 func Sort(arr *[]models.CancellationCondition, start, end int) []models.CancellationCondition {
 	if start < end {
 		partitionIndex := partition(*arr, start, end)
@@ -116,7 +115,6 @@ func Sort(arr *[]models.CancellationCondition, start, end int) []models.Cancella
 	return *arr
 }
 
-// unit
 func partition(arr []models.CancellationCondition, start, end int) int {
 	pivot := arr[end].Penalty
 	pIndex := start
@@ -312,7 +310,7 @@ func GeneratePdf(reservations []models.Reservation, saveTo string) error {
 	}
 	err2 := m.OutputFileAndClose(saveTo)
 	if err2 != nil {
-		return fmt.Errorf("pdf cant build")
+		return err2
 	}
 	return nil
 }

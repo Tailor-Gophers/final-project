@@ -1,9 +1,12 @@
-package services
+package main
 
 import "testing"
+import "alidada/services"
 import "alidada/models"
 import "time"
 import "errors"
+import "fmt"
+import "os"
 
 type sortTest struct {
 	cancellationConditions       *[]models.CancellationCondition
@@ -53,7 +56,7 @@ var sortTests = []sortTest{
 func TestSort(t *testing.T) {
 
 	for j, test := range sortTests {
-		output := Sort(test.cancellationConditions, test.start, test.end)
+		output := services.Sort(test.cancellationConditions, test.start, test.end)
 		for i, out := range output {
 			if out.ID != test.sortedCancellationConditions[i].ID {
 				t.Errorf("Output %d not equal to expected %d test number %d", out.ID, test.sortedCancellationConditions[i].ID, j+1)
@@ -127,7 +130,7 @@ var penaltyTests = []penaltyTest{
 
 func TestPenalty(t *testing.T) {
 	for j, test := range penaltyTests {
-		penalty, error := PenaltyCalculation(test.reservation, test.flightclass, test.sortedCancellationConditions)
+		penalty, error := services.PenaltyCalculation(test.reservation, test.flightclass, test.sortedCancellationConditions)
 		if penalty != test.penalty {
 			t.Errorf("Output %d not equal to expected %d test number %d", penalty, test.penalty, j+1)
 		}
@@ -137,4 +140,53 @@ func TestPenalty(t *testing.T) {
 		}
 
 	}
+}
+
+type generatePdfTest struct {
+	reservations []models.Reservation
+	saveTo       string
+	error        error
+}
+
+var generatePdfTests = []generatePdfTest{
+	generatePdfTest{
+		[]models.Reservation{
+			{Model: models.Model{ID: 1}, FlightClassID: 1, OrderID: 1, Price: 1, IsCancelled: false,
+				Passenger: models.Passenger{FirstName: "eghbal", LastName: "shirasb", DateOfBirth: "26/9/77",
+					Nationality: "irani", PassportNumber: "1916784171"}, Confirmed: true,
+				FlightClass: models.FlightClass{Model: models.Model{ID: 1}, Flight: &models.Flight{StartTime: time.Now().Add(-1 * time.Minute * 41), Origin: "tehran", Destination: "mashhad"}, Title: "ecconomy"}},
+		},
+		"pdf/test_1.pdf",
+		nil,
+	},
+	generatePdfTest{
+		[]models.Reservation{
+			{Model: models.Model{ID: 1}, FlightClassID: 1, OrderID: 1, Price: 1, IsCancelled: false,
+				Passenger: models.Passenger{FirstName: "eghbal", LastName: "shirasb", DateOfBirth: "26/9/77",
+					Nationality: "irani", PassportNumber: "1916784171"}, Confirmed: true,
+				FlightClass: models.FlightClass{Model: models.Model{ID: 1}, Flight: &models.Flight{StartTime: time.Now().Add(-1 * time.Minute * 41), Origin: "tehran", Destination: "mashhad"}, Title: "ecconomy"}},
+			{Model: models.Model{ID: 1}, FlightClassID: 1, OrderID: 1, Price: 1, IsCancelled: false,
+				Passenger: models.Passenger{FirstName: "armin", LastName: "armin", DateOfBirth: "26/9/77",
+					Nationality: "irani", PassportNumber: "1916784171"}, Confirmed: true,
+				FlightClass: models.FlightClass{Model: models.Model{ID: 1}, Flight: &models.Flight{StartTime: time.Now().Add(-1 * time.Minute * 41), Origin: "tehran", Destination: "mashhad"}, Title: "ecconomy"}},
+		},
+		"pdf/test_2.pdf",
+		nil,
+	},
+}
+
+func TestGeneratePdf(t *testing.T) {
+	for j, test := range generatePdfTests {
+		error := services.GeneratePdf(test.reservations, test.saveTo)
+		if (error != nil && test.error == nil) || (error == nil && test.error != nil) {
+			fmt.Println(error)
+			t.Errorf("Error not equal test number %d", j+1)
+		}
+		if error != nil {
+			if _, err := os.Stat(test.saveTo); errors.Is(err, os.ErrNotExist) {
+				t.Errorf("Error pdf not generated test number %d", j+1)
+			}
+		}
+	}
+
 }
