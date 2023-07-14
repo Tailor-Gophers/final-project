@@ -71,4 +71,4 @@ You can see the document of all APIs along with their examples in the collection
 ![](qsms/static/qsms_db_scheme.jpg)
 
 ###How to use
-For using the app you must send http requsts after running it you can see full guide to how to send requests in this [postman collection](https://documenter.getpostman.com/view/15181898/2s946fcsBn).
+- For using the app you must send http requsts after running it you can see full guide to how to send requests in this [postman collection](https://documenter.getpostman.com/view/15181898/2s946fcsBn).
