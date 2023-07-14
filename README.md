@@ -11,7 +11,7 @@
 
 # How to run
 
-####Run with Docker
+## Run with Docker
 
 To run the project, you only need to install Docker on your system
 
@@ -32,24 +32,14 @@ mysql2  | MockApi DB
 mysql3  | Qsms DB
 redis  | Caching system
 
-###Model diagram
+## Model diagram
 ![diagram](alidada/static/diagram.png )
 
 We should note that Flight and FlightClass are in the MockAPI system and are shown in this section only to show the dependencies.
-###Caching scenario
+## Caching scenario
 It is like a remember scenario, and if there is no key in the cache, it receives it from the main source and stores it to respond from the cache in case of repetition. Of course, it does not read vital information such as the capacity from the cache.
                     
-```seq
-application->get_flight: get flight 1
-get_flight-->redis: Do we have cached? 
-redis->>get_flight:no
-get_flight-->mockapi: get flight 1
-get_flight-->redis: cache flight 1?
-application->get_flight: get flight 1 again
-get_flight-->redis: Do we have cached? 
-redis->>get_flight:yes
-get_flight->redis: get flight 1 from redis
-
-```
-
-###End
+![diagram](alidada/static/senario.png )
+## AliDada Postman Document
+You can see the document of all APIs along with their examples in the collection below for Ali Dada
+[AliDada Postman](https://documenter.getpostman.com/view/16800432/2s93zCYLT1 "AliDada Postman")
