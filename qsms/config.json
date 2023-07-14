@@ -1,0 +1,18 @@
+{
+    "simple_message_fee": 10,
+    "periodic_message_fee": 5,
+    "template_fee": 5,
+    "bad_words": [
+        "porn",
+        "nigga",
+        "faggot",
+        "shit",
+        "dick",
+        "pussy",
+        "cock",
+        "ass",
+        "nigger",
+        "foo",
+        "boo"
+    ]
+}

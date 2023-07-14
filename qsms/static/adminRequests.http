@@ -1,0 +1,49 @@
+###
+GET http://localhost:3000/sms/user/login
+Content-Type: application/json
+
+{
+  "email": "nimaebrahimi@gmail.com",
+  "password": "nima1234"
+}
+
+###
+POST http://localhost:3000/sms/admin/addNumber
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTA4MTc3MSwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.XEK-FNffxKO68LKNUlNGbnn1asMqjU-xFfK94qe6G5w
+
+{
+  "phone_number": "+6515915152",
+  "price": 100
+}
+
+###
+PUT http://localhost:3000/sms/admin/suspend/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NTc2NjQ5LCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.0huW7bj1ZPOZDg3RUvfoYDTWhaUVH-qTKpqicGfXDjE
+
+###
+PUT http://localhost:3000/sms/admin/unsuspend/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NTc2NjQ5LCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.0huW7bj1ZPOZDg3RUvfoYDTWhaUVH-qTKpqicGfXDjE
+
+
+###
+GET http://localhost:3000/sms/admin/count/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjYzNTgzLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.VPmsmQJloDwdYmq76GOvryHozsFIK6W5or2UpJvtJ34
+
+###
+GET http://localhost:3000/sms/admin/search
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZXhwIjoxNjg4NjYzNTgzLCJuYW1lIjoiUGx1dG8iLCJzdWIiOjF9.VPmsmQJloDwdYmq76GOvryHozsFIK6W5or2UpJvtJ34
+Content-Type: application/json
+
+{
+  "words" : ["gay", "boo"]
+}
+
+###
+POST http://localhost:3000/sms/admin/addBadWord
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwiZGlzYWJsZSI6ZmFsc2UsImV4cCI6MTY4OTI2NTg5OCwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.VlZRefFlJE9Cm4YeLnBRpWokbk0C5s3WxjNn_lzpzzw
+Content-Type: application/json
+
+{
+"words" : ["foo", "boo"]
+}

@@ -1,0 +1,61 @@
+### Create Phone Book ###
+POST http://localhost:3000/sms/user/phonebook/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
+
+{
+  "name": "My Phone Book 1"
+}
+
+### Delete Phone Book ###
+DELETE http://localhost:3000/sms/user/phonebook/delete/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
+
+###
+PUT http://localhost:3000/sms/user/phonebook/addNumber/1/+989124652428
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImRpc2FibGUiOmZhbHNlLCJleHAiOjE2ODkyNTg5MjMsIm5hbWUiOiJQbHV0byIsInN1YiI6MX0.13Yaz8qR4f7Fzz2-XCWAmGbanQmasaCwN6naBtBLeSY
+
+###
+
+### Add Contact to Phone Book ###
+POST http://localhost:3000/sms/user/contacts/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTY4ODE0OTY2NiwibmFtZSI6IlBsdXRvIiwic3ViIjoxfQ.Wdbb9ioMUZvsornWjKZJPn3GpGgIrUOAuTnACcOr7hM
+
+{
+  "name": "Amir",
+  "phone": "+6451654845"
+}
+
+###
+
+### Delete Contact from Phone Book ###
+DELETE http://localhost:3000/sms/user/1/contacts/1
+
+###
+
+### Update Contact in Phone Book ###
+PUT http://localhost:3000/sms/user/1/contacts/2
+Content-Type: application/json
+
+{
+  "name": "Updated Amir",
+  "phone": "+9876543210"
+}
+
+### Send sms to phonebooks ###
+POST http://localhost:3000/sms/phonebook/send-sms/1,2
+Content-Type: application/json
+
+{
+  "message": "Your SMS message content"
+}
+
+### send sms to phone ###
+POST http://localhost:3000/sms/user/send-sms
+Content-Type: application/json
+
+{
+  "number": "+1234567890",
+  "message": "Your SMS message content"
+}
