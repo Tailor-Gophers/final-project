@@ -38,8 +38,37 @@ redis  | Caching system
 We should note that Flight and FlightClass are in the MockAPI system and are shown in this section only to show the dependencies.
 ## Caching scenario
 It is like a remember scenario, and if there is no key in the cache, it receives it from the main source and stores it to respond from the cache in case of repetition. Of course, it does not read vital information such as the capacity from the cache.
+
+
                     
 ![diagram](alidada/static/senario.png )
 ## AliDada Postman Document
 You can see the document of all APIs along with their examples in the collection below for Ali Dada
 [AliDada Postman](https://documenter.getpostman.com/view/16800432/2s93zCYLT1 "AliDada Postman")
+
+
+# Qsms by Tailor Gophers
+
+### Features
+
+- User and admin registeration and authorization.
+- User wallet and payments.
+- Creating and Contacts.
+- Creating and editing Phonebooks.
+- Buying a number from available numbers.
+- Renting a number for a monthly basis.
+- Sending messages to numbers, contacts and phonebooks.
+- Bad words filter.
+- Creating and using message templates.
+- Setting message scheduler for sending periodic messages with spedified interval.
+-  Full admin controll such as suspending and un suspending user, searching messages, counting user messages.
+
+
+###Description
+- This project is developed over MVC(Model View Controller) patter where requests are handled and validated by the Controller layer and corresponding functions will be called from this layer.
+- This project is using MySQL for persisting data and Gorm for Object Reletional Mapping.
+- you can see the database schema in the diagram below
+![](qsms/static/qsms_db_scheme.jpg)
+
+###How to use
+For using the app you must send http requsts after running it you can see full guide to how to send requests in this [postman collection](https://documenter.getpostman.com/view/15181898/2s946fcsBn).
