@@ -1,5 +1,8 @@
-##  Alidada Features
+![Goopher](alidada/static/logo.JPG )
 
+### Tailor Gopher Team Final Project
+
+##  Alidada Features
 - Using a layered architecture for higher readability and easier changes.
 - Ali Dada generally includes the features of registration, login, logout, adding a new passenger, booking tickets, paying and viewing tickets.
 - Using the cache layer to store the information of the planes that arrived from the MAC system.
