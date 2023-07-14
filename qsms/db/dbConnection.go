@@ -11,7 +11,7 @@ import (
 
 func GetDbConnection() *gorm.DB {
 
-	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
+	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_URL"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
 
 	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
 	if err != nil {

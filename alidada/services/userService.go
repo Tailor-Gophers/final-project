@@ -102,7 +102,10 @@ func (s *UserServicet) GetMyTicketsPdf(user *models.User, id string) (string, er
 	}
 	saveTo := fmt.Sprintf("pdf/ticketsOfOrder%s.pdf", id)
 
-	GeneratePdf(reservations, saveTo)
+	err = GeneratePdf(reservations, saveTo)
+	if err != nil {
+		return "", err
+	}
 
 	return saveTo, nil
 }

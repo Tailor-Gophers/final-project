@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"qsms/models"
@@ -22,10 +21,6 @@ func NewPaymentController(userService services.UserService, paymentService servi
 	}
 }
 
-const (
-	CallBackURL = "http://localhost:3000/sms/payment/verify"
-)
-
 func (pc *PaymentController) AddBalance(c echo.Context) error {
 
 	amount, err := strconv.Atoi(c.Param("amount"))
@@ -44,7 +39,7 @@ func (pc *PaymentController) AddBalance(c echo.Context) error {
 		return c.String(500, err.Error())
 	}
 
-	paymentURL, authority, statusCode, err := zarinPay.NewPaymentRequest(amount, CallBackURL, "User balance charge.", user.Email, "")
+	paymentURL, authority, statusCode, err := zarinPay.NewPaymentRequest(amount, utils.ENV("APP_URL")+"/sms/payment/verify", "User balance charge.", user.Email, "")
 
 	if err != nil {
 		if statusCode == -3 {
@@ -67,8 +62,6 @@ func (pc *PaymentController) AddBalance(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to create transaction!")
 	}
-
-	fmt.Println(paymentURL)
 
 	//err = c.Redirect(http.StatusFound, paymentURL)
 	//if err != nil {

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"qsms/models"
 	"qsms/repository"
 	"qsms/utils"
@@ -85,7 +84,6 @@ func (us *userService) AddBalance(userId uint, amount int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(user.Balance + amount)
 	return us.userRepository.UpdateBalance(userId, user.Balance+amount)
 }
 

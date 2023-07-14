@@ -36,6 +36,9 @@ func (rc *ReservationController) Reserve(c echo.Context) error {
 	}
 
 	user, err := rc.UserService.UserByToken(utils.GetToken(c))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Unauthorized!")
+	}
 
 	//Check for passengers
 	for _, id := range reservationReq.PassengerIDs {

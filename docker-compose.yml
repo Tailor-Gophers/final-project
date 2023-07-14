@@ -1,0 +1,142 @@
+version: '3.8'
+services:
+
+  alidada:
+    build:
+      context: ./alidada
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql1
+      - redis
+      - mockapi
+    hostname: alidada
+    working_dir: /root/
+    environment:
+      - DB_DATABASE=alidada
+      - MOCK_DATABASE=mockapi
+      - DB_USERNAME=root
+      - DB_PASSWORD=12345678
+      - DB_PORT=3306
+      - MERCHANT_ID=7b24c23a-ebb5-11e8-8df1-005056a205be
+      - URL=http://localhost:3000
+      - MOCK_URL=http://mockapi:3001
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - SANDBOX=true
+    networks:
+      - default
+    ports:
+      - '3000:3000'
+
+  mockapi:
+    build:
+      context: ./mockapi
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql2
+    hostname: mockapi
+    working_dir: /root/
+    environment:
+      - DB_DATABASE=mockapi
+      - DB_USERNAME=root
+      - DB_PASSWORD=12345678
+      - DB_PORT=3306
+      - DB_URL=mysql2
+    networks:
+      - default
+    ports:
+      - '3001:3001'
+
+  qsms:
+    build:
+      context: ./qsms
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql3
+    hostname: qsms
+    working_dir: /root/
+    environment:
+      - DB_DATABASE=qsms
+      - DB_USERNAME=root
+      - DB_PASSWORD=12345678
+      - DB_PORT=3306
+      - MERCHANT_ID=7b24c23a-ebb5-11e8-8df1-005056a205be
+      - SANDBOX=true
+    networks:
+      - default
+    ports:
+      - '3002:3000'
+
+  smsmock:
+    build:
+      context: ./smsmock
+      dockerfile: Dockerfile
+    hostname: smsmock
+    working_dir: /root/
+    networks:
+      - default
+    ports:
+      - '3003:3000'
+
+  mysql1:
+    image: mysql:8
+    restart: always
+    container_name: mysql1
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=alidada
+      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ALLOW_EMPTY_PASSWORD=ok
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - default
+    ports:
+      - '3308:3306'
+
+  mysql2:
+    image: mysql:8
+    restart: always
+    container_name: mysql2
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=mockapi
+      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ALLOW_EMPTY_PASSWORD=ok
+    volumes:
+      - ./mysql-data2:/var/lib/mysql
+    networks:
+      - default
+    ports:
+      - '3309:3306'
+
+  mysql3:
+    image: mysql:8
+    restart: always
+    container_name: mysql3
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=qsms
+      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ALLOW_EMPTY_PASSWORD=ok
+    volumes:
+      - ./mysql-data3:/var/lib/mysql
+    networks:
+      - default
+    ports:
+      - '3310:3306'
+
+  redis:
+    image: redis:latest
+    restart: always
+    volumes:
+      - ./redis:/data
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

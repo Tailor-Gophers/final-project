@@ -214,7 +214,6 @@ func (u *UserController) GetMyTicketsPdf(c echo.Context) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-
 	return c.File(pdfAdr)
 }
 func (u *UserController) GetMyTickets(c echo.Context) error {

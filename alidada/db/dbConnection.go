@@ -12,7 +12,7 @@ import (
 
 func GetDbConnection() *gorm.DB {
 
-	dbURI := fmt.Sprintf("%s:%s@tcp(localhost:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
+	dbURI := fmt.Sprintf("%s:%s@tcp(mysql1:%s)/%s?charset=utf8&parseTime=True&loc=Local", utils.ENV("DB_USERNAME"), utils.ENV("DB_PASSWORD"), utils.ENV("DB_PORT"), utils.ENV("DB_DATABASE"))
 	// Connect to the database
 
 	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
@@ -28,7 +28,7 @@ func GetDbConnection() *gorm.DB {
 }
 
 func GetRedisConnection() *redis.Client {
-	redisURI := fmt.Sprintf("localhost:%s", utils.ENV("REDIS_PORT"))
+	redisURI := fmt.Sprintf("redis:%s", utils.ENV("REDIS_PORT"))
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisURI,
 		Password: utils.ENV("REDIS_PASSWORD"),

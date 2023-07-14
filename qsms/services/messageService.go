@@ -263,7 +263,7 @@ func (ms *messageService) sendSms(receiver string, text string) error {
 		"receiver": receiver,
 		"message":  text,
 	})
-	resp, err := http.Post("http://localhost:3002/send", "application/json", bytes.NewBuffer(postBody))
+	resp, err := http.Post(utils.ENV("MOCK_URL")+"/send", "application/json", bytes.NewBuffer(postBody))
 	if err != nil {
 		return errors.New("failed to send request: " + err.Error())
 	}

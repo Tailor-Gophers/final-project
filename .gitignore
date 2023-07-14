@@ -1,5 +1,5 @@
 .idea/
-alidada/Phase2
-alidada/.env
-mockapi/.env
-*.pdf
+.vscode/
+.mysql-data/
+.mysql-data2/
+.mysql-data3/

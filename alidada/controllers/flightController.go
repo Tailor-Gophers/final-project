@@ -23,10 +23,11 @@ func (f *FlightController) SearchFlightsDay(c echo.Context) error {
 	dateStr := c.QueryParam("date")
 
 	url := fmt.Sprintf("%s/flights/%s/%s/%s", utils.ENV("MOCK_URL"), origin, destination, dateStr)
+
 	res, err := http.Get(url)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get flights from mockapi",
+			"error": "Failed to get flights from mockapi" + err.Error(),
 		})
 	}
 	defer res.Body.Close()
