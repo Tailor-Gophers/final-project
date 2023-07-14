@@ -64,11 +64,11 @@ You can see the document of all APIs along with their examples in the collection
 -  Full admin controll such as suspending and un suspending user, searching messages, counting user messages.
 
 
-###Description
+### Description
 - This project is developed over MVC(Model View Controller) patter where requests are handled and validated by the Controller layer and corresponding functions will be called from this layer.
 - This project is using MySQL for persisting data and Gorm for Object Reletional Mapping.
 - you can see the database schema in the diagram below
 ![](qsms/static/qsms_db_scheme.jpg)
 
-###How to use
+### How to use
 - For using the app you must send http requsts after running it you can see full guide to how to send requests in this [postman collection](https://documenter.getpostman.com/view/15181898/2s946fcsBn).
